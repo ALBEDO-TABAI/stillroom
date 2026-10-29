@@ -46,3 +46,24 @@ Known differences / not done:
 - Canvas-menu Text in the original creates an unpacked text with a "T" pill; ours creates the existing default.
 - Signed-out landing page (marketing hero + "Request access") is not replicated.
 - Desktop: `desktop/` Electron wrapper, `scripts/build-mac.sh`, see `docs/MAC_TEST.md`.
+
+## Phase 4 — closing the phase-3 gaps (code-only, 2026-10-29 JST)
+
+- **Folders are sub-canvases.** The folder panel is gone. Opening a folder (handle pill → folder column) swaps the
+  canvas to that folder's modules; children keep their world coordinates and the camera is not refit. The breadcrumb
+  grows one glass pill per level inside the shared silhouette (`@handle` | `Folder` | `Sub folder`); the last pill
+  toggles its sub-folder column, an earlier pill jumps to that level, `@handle` goes back to the root. New modules,
+  the Bin and Clear All are scoped to the open folder; search opens the module's folder before framing it.
+  Double-click on a folder only zooms (as in the original).
+- **Video drops are ignored** (the camera/file picker accepts images and audio only).
+- **Canvas menu → Text** makes a frameless paragraph text (`titleLevel: 'p'`, 12px left-aligned title); the inline
+  pill shows **T** (click: T → H1 → T…), Block is dimmed, and the bottom pill shows a frame glyph while empty.
+  Canvas menu → Folder is titled "New Folder".
+- **Signed-out landing** (`#/welcome`, also `/welcome`, and where Sign out goes): field of our own modules at 0.85
+  scale, hero 142px above the bottom, chevron, glass e-mail + accent "Request access" pair 72px above the bottom,
+  footer 14px, "Sign in" top-right. Request access only stores the address in `localStorage` (`sr-access-requests`);
+  Sign in is a local name prompt that opens the canvas. Always dark, like the original.
+- Harness: new signed states `u_in_folder_dark`, `u_new_text_dark` (reference = account base with the measured new
+  text region from the private capture), `u_landing_dark` (reference module pictures greyed; chevron position taken
+  from pixels because the DOM rect was captured mid-animation). Behaviour checks 31/31 (folder navigation, T text,
+  landing with zero external requests, video ignored).

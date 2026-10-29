@@ -32,7 +32,8 @@ export function Canvas() {
   const space = useRef(false);
   const guides = useSyncExternalStore(f => { useGuides.listeners.add(f); return () => useGuides.listeners.delete(f); }, () => useGuides.lines);
 
-  const ids = useMemo(() => liveIds({ notes, order }), [notes, order]);
+  const folder = useStore(s => s.ui.openFolderId);
+  const ids = useMemo(() => liveIds({ notes, order }, folder), [notes, order, folder]);
   const groups = useMemo(() => {
     const items = ids.map(id => ({ id, r: rectOf(notes[id], sizes) }));
     return clusters(items).filter(g => g.length > 1).map(g => ({ ids: g, d: silhouettePath(g.map(id => rectOf(notes[id], sizes))) }));
@@ -134,8 +135,7 @@ export function Canvas() {
         // zoom so the folder stands at ~48% of the viewport's short side, centred (measured on the reference)
         const r = rectOf(n, st.sizes);
         const z = Math.min(0.47682 * Math.min(innerWidth, innerHeight) / Math.max(r.w, r.h), 3);
-        if (Math.abs(st.cam.z - z) / z < 0.03) st.setUI({ openFolderId: id });
-        else st.setCam({ x: innerWidth / 2 - (r.x + r.w / 2) * z, y: innerHeight / 2 - (r.y + r.h / 2) * z, z }, 520);
+        st.setCam({ x: innerWidth / 2 - (r.x + r.w / 2) * z, y: innerHeight / 2 - (r.y + r.h / 2) * z, z }, 520);
       }
       else if (n.type === 'link') window.open(n.metadata.url ?? n.title, '_blank', 'noopener');
       else if (n.type === 'video') st.setUI({ slideshowId: id });
@@ -262,7 +262,7 @@ export function Canvas() {
     if (!d) return;
     if (d.kind === 'marquee') {
       if (!marquee && Math.hypot(e.clientX - d.sx, e.clientY - d.sy) < 3 && !e.shiftKey) {
-        st.select([]); st.setUI({ openFolderId: null });
+        st.select([]);
       }
       setMarquee(null); return;
     }

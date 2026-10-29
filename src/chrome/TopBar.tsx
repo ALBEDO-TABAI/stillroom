@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { useStore, liveIds } from '../store/store';
+import { useStore, liveIds, folderPath } from '../store/store';
 import { useShallow } from 'zustand/react/shallow';
 import { Icon } from '../lib/icons';
 import { btn } from '../lib/button';
@@ -18,13 +18,25 @@ export function TopBar({ demo }: { demo: boolean }) {
   const setPrefs = useStore(s => s.setPrefs);
   const nameRef = useRef<HTMLButtonElement>(null);
   const [crumb, setCrumb] = useState(false);
-  const binCount = useStore(s => s.ui.binOpen ? Object.values(s.notes).filter(n => n.deletedAt).length : 0);
-  const folders = useStore(useShallow(s => s.order.map(id => s.notes[id]).filter(n => n && n.type === 'folder' && !n.parentId && !n.deletedAt).map(n => n.id + '\u0000' + (n.title || 'Folder')))).map(k => { const [id, title] = k.split('\u0000'); return { id, title }; });
+  const binCount = useStore(s => s.ui.binOpen ? Object.values(s.notes).filter(n => n.deletedAt && (n.parentId ?? null) === s.ui.openFolderId).length : 0);
+  const cur = useStore(s => s.ui.openFolderId);
+  // breadcrumb: one pill per folder from the root down to the open one
+  const trail = useStore(useShallow(s => folderPath(s, s.ui.openFolderId).map(id => id + '\u0000' + (s.notes[id]?.title || 'Folder')))).map(k => { const [id, title] = k.split('\u0000'); return { id, title }; });
+  const pillRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const [trailW, setTrailW] = useState<number[]>([]);
+  const folders = useStore(useShallow(s => s.order.map(id => s.notes[id]).filter(n => n && n.type === 'folder' && (n.parentId ?? null) === s.ui.openFolderId && !n.deletedAt).map(n => n.id + '\u0000' + (n.title || 'Folder')))).map(k => { const [id, title] = k.split('\u0000'); return { id, title }; });
   useEscape(() => setCrumb(false), crumb);
   const [nameW, setNameW] = useState(82.77);
-  useLayoutEffect(() => { if (nameRef.current) setNameW(nameRef.current.getBoundingClientRect().width); }, [username]);
-  const path = useMemo(() => pillRowPath([48, nameW], 6), [nameW]);
-  const total = 48 + 6 + nameW;
+  const trailKey = trail.map(t => t.id + t.title).join('|');
+  useLayoutEffect(() => {
+    if (nameRef.current) setNameW(nameRef.current.getBoundingClientRect().width);
+    setTrailW(trail.map((_, i) => pillRefs.current[i]?.getBoundingClientRect().width ?? 0));
+  }, [username, trailKey]);
+  const widths = [48, nameW, ...trail.map((_, i) => trailW[i] || 0)];
+  const path = useMemo(() => pillRowPath(widths, 6), [widths.join(',')]);
+  const total = widths.reduce((a, b) => a + b, 0) + 6 * (widths.length - 1);
+  const colLeft = widths.slice(0, -1).reduce((a, b) => a + b + 6, 0);
+  const pillStyle = (on: boolean) => on ? { background: 'var(--sr-tint)', color: 'var(--sr-text)' } : undefined;
 
   return (
     <div className="sr-topbar" data-topbar="true" data-hidden={focus ? 'true' : undefined}>
@@ -37,11 +49,16 @@ export function TopBar({ demo }: { demo: boolean }) {
           <button aria-label="User menu" className={btn({ icon: true, surface: 'ghost', quiet: true, on: open })} onClick={() => setUI({ userMenu: !open, shortcuts: false, menu: null })}>
             <Icon name="user" />
           </button>
-          <button ref={nameRef} data-bc-pill="true" className={btn({ surface: 'ghost', quiet: true })} style={crumb ? { background: 'var(--sr-tint)', color: 'var(--sr-text)' } : undefined} onClick={() => { setUI({ userMenu: false, shortcuts: false, menu: null }); setCrumb(c => !c); }}>@{username}</button>
+          <button ref={nameRef} data-bc-pill="true" className={btn({ surface: 'ghost', quiet: true })} style={pillStyle(crumb && !cur)} onClick={() => { setUI({ userMenu: false, shortcuts: false, menu: null }); if (cur) { setCrumb(false); setUI({ openFolderId: null }); } else setCrumb(c => !c); }}>@{username}</button>
+          {trail.map((f, i) => (
+            <button key={f.id} ref={el => { pillRefs.current[i] = el; }} data-bc-pill="true" data-bc-folder={f.id} className={btn({ surface: 'ghost', quiet: true })}
+              style={pillStyle(crumb && i === trail.length - 1)}
+              onClick={() => { setUI({ userMenu: false, shortcuts: false, menu: null }); if (i === trail.length - 1) setCrumb(c => !c); else { setCrumb(false); setUI({ openFolderId: f.id }); } }}>{f.title}</button>
+          ))}
         </div>
         {crumb && folders.length > 0 && (
           // Folder column under the handle (measured: 42 + 6 below, 6 apart, left-aligned to the handle).
-          <div className="sr-crumbs sr-in" style={{ left: 54, ['--sr-in-t' as any]: '0 -10px' }}>
+          <div className="sr-crumbs sr-in" style={{ left: colLeft, ['--sr-in-t' as any]: '0 -10px' }}>
             {folders.map(f => (
               <button key={f.id} data-bc-col-pill="true" className={btn({ surface: 'ghost', quiet: true })} style={{ background: 'var(--sr-glass)', WebkitBackdropFilter: 'var(--sr-blur)', backdropFilter: 'var(--sr-blur)' }} onClick={() => { setCrumb(false); setUI({ openFolderId: f.id }); }}>{f.title}</button>
             ))}
@@ -50,7 +67,7 @@ export function TopBar({ demo }: { demo: boolean }) {
         {open && <UserMenu />}
       </div>
       {!demo && binCount > 0 && <button className={btn({ quiet: true }) + ' sr-clear-all'} style={{ right: 'calc(50% + 98px)' }}
-        onClick={() => { if (confirm('Permanently delete all items in Bin? This cannot be undone.')) useStore.getState().purge(Object.values(useStore.getState().notes).filter(n => n.deletedAt).map(n => n.id)); }}>Clear All</button>}
+        onClick={() => { if (confirm('Permanently delete all items in Bin? This cannot be undone.')) useStore.getState().purge(Object.values(useStore.getState().notes).filter(n => n.deletedAt && (n.parentId ?? null) === useStore.getState().ui.openFolderId).map(n => n.id)); }}>Clear All</button>}
       {!demo && <Search />}
       <div style={{ flex: 1 }} />
       <button className={btn({ icon: true, quiet: true })} style={{ pointerEvents: 'auto' }} title={dark ? 'Light mode' : 'Dark mode'}
@@ -90,9 +107,10 @@ export function Search() {
   const go = (id: string) => {
     const st = useStore.getState(); const n = st.notes[id];
     if (!bin) {
-      const target = n.parentId ? st.notes[n.parentId] : n;
-      frameRect(rectOf(target, st.sizes), { pad: 160, maxZ: 1.6 });
-      st.select([target.id]);
+      // open the module's own canvas (its folder), then frame it
+      if ((n.parentId ?? null) !== st.ui.openFolderId) st.setUI({ openFolderId: n.parentId ?? null });
+      frameRect(rectOf(n, st.sizes), { pad: 160, maxZ: 1.6 });
+      st.select([n.id]);
     }
     setUI({ search: '' }); inp.current?.blur();
   };

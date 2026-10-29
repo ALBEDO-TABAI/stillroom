@@ -31,7 +31,7 @@ export function TextCard({ note, editing, playing, onPlay }: { note: Note; editi
   if (m.transcribing) return <Transcribing />;
 
   const style: any = {
-    '--sr-title-fs': `${18 * scale}px`, '--sr-body-fs': `${12 * scale}px`, '--sr-title-gap': packed || hasBody(note.text) ? '12px' : '0px',
+    '--sr-title-fs': `${(m.titleLevel === 'p' ? 12 : 18) * scale}px`, '--sr-body-fs': `${12 * scale}px`, '--sr-title-gap': packed || hasBody(note.text) ? '12px' : '0px',
     ...(packed ? { maxHeight: note.type === 'audio' ? undefined : 195 } : { minHeight: m.frameH ?? 66, ...(m.frameH ? { justifyContent: 'flex-start' } : {}) }),
     ...(note.type === 'audio' ? { paddingBottom: 52 } : {}),
   };
@@ -52,7 +52,7 @@ export function TextCard({ note, editing, playing, onPlay }: { note: Note; editi
             e.stopPropagation();
             if (e.key === 'Escape' || ((e.metaKey || e.ctrlKey) && e.key === 'Enter')) { e.preventDefault(); (e.target as HTMLElement).blur(); useStore.getState().setUI({ editingId: null }); }
           }}
-          style={{ textAlign: m.titleAlign ?? (packed ? 'left' : 'center'), fontWeight: WEIGHT[m.titleWeight ?? 'regular'], ...(packed ? { maxHeight: 137, overflow: 'hidden' } : {}) }}
+          style={{ textAlign: m.titleAlign ?? (packed || m.titleLevel === 'p' ? 'left' : 'center'), fontWeight: WEIGHT[m.titleWeight ?? 'regular'], ...(packed ? { maxHeight: 137, overflow: 'hidden' } : {}) }}
         >{editing ? note.title : <span>{note.title || (editing ? '' : '\u00a0')}</span>}</div>
         {note.type !== 'audio' && (packed || hasBody(note.text)) && (
           <div style={packed ? { position: 'relative', zIndex: 1, flex: '1 1 auto', minHeight: 0, overflow: 'hidden', marginTop: 0 } : { position: 'relative', zIndex: 1, marginTop: 12 * scale * 0.7 }}>

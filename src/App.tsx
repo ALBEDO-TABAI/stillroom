@@ -8,7 +8,6 @@ import { Bin } from './chrome/Bin';
 import { CanvasMenu, AxisMenu, LinkInput } from './overlays/Menus';
 import { EditorWindow } from './overlays/EditorWindow';
 import { Slideshow } from './overlays/Slideshow';
-import { FolderPanel } from './overlays/FolderPanel';
 import { useShortcuts } from './canvas/useShortcuts';
 import { addFiles, addTextOrLink } from './lib/capture';
 import { toWorld } from './canvas/camera';
@@ -18,11 +17,13 @@ export function App({ demo }: { demo: boolean }) {
   const dark = useStore(s => s.prefs.dark);
   const route = useRoute();
   useEffect(() => {
+    const dark_ = dark;
+    { const dark = dark_ || route === 'welcome'; // the signed-out landing is always dark (as measured)
     document.documentElement.dataset.theme = dark ? 'dark' : 'light';
     document.documentElement.style.backgroundColor = dark ? '#000000' : '#E5E5EA';
     document.body.style.backgroundColor = dark ? '#000000' : '#E5E5EA';
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#000000' : '#E5E5EA');
-  }, [dark]);
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#000000' : '#E5E5EA'); }
+  }, [dark, route]);
   if (route === 'welcome') return <Welcome />;
   return <Workspace demo={demo} />;
 }
@@ -64,7 +65,6 @@ function Workspace({ demo }: { demo: boolean }) {
       <AxisMenu />
       <LinkInput />
       <EditorWindow />
-      <FolderPanel />
       <Slideshow />
       {toast && <div className="sr-toast sr-in" style={{ ['--sr-in-t' as any]: '0 8px' }}>{toast}</div>}
       {drag && <div className="sr-drop" />}
@@ -73,7 +73,7 @@ function Workspace({ demo }: { demo: boolean }) {
 }
 
 function useRoute() {
-  const get = () => (location.hash.startsWith('#/welcome') ? 'welcome' : 'canvas');
+  const get = () => (location.hash.startsWith('#/welcome') || location.pathname === '/welcome' ? 'welcome' : 'canvas');
   const [r, setR] = useState(get);
   useEffect(() => { const f = () => setR(get()); addEventListener('hashchange', f); return () => removeEventListener('hashchange', f); }, []);
   return r;

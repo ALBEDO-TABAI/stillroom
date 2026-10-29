@@ -149,3 +149,17 @@
 .sr-bin-item .sr-card[data-unpacked] .sr-card-bg { background: var(--sr-card); }
 .sr-bin-item .sr-card[data-unpacked] .sr-title { margin-bottom: 12px; }
 .sr-bin-item .sr-card > div:not(.sr-card-bg) { -webkit-mask-image: linear-gradient(#000 calc(100% - 40px), transparent); mask-image: linear-gradient(#000 calc(100% - 40px), transparent); overflow: hidden; }
+
+/* signed-out landing */
+.sr-landing { position: fixed; inset: 0; overflow: hidden; background: #000; color: var(--sr-text); font-family: Inter, -apple-system, BlinkMacSystemFont, 'SF Pro Display', Arial, sans-serif; }
+.sr-landing-field { position: absolute; inset: 0; pointer-events: none; }
+.sr-landing-tile { position: absolute; }
+.sr-landing-tile .sr-card { max-height: 195px; overflow: hidden; }
+.sr-landing-hero { position: absolute; left: 0; right: 0; bottom: 142px; z-index: 60; text-align: center; padding: 0 24px; box-sizing: border-box; pointer-events: none; }
+.sr-landing-more { position: absolute; left: 50%; transform: translateX(-50%); top: calc(100% - 165px); z-index: 61; width: 64px; justify-content: center; background: transparent !important; color: var(--sr-muted); }
+.sr-landing-signin { position: absolute; top: 16px; right: 20px; z-index: 91; height: 42px; padding: 0 18px; display: flex; align-items: center; border-radius: 999px; font-size: 15px; font-weight: 500; letter-spacing: -0.01em; color: rgb(240,240,240); text-decoration: none; background: var(--sr-glass); backdrop-filter: var(--sr-blur); -webkit-backdrop-filter: var(--sr-blur); }
+.sr-landing-form { position: fixed; left: 0; right: 0; bottom: 72px; z-index: 80; display: flex; justify-content: center; pointer-events: none; }
+.sr-landing-email { position: absolute; left: 0; top: 0; width: 254px; height: 42px; padding: 0 20px; box-sizing: border-box; font: 500 15px Inter, -apple-system, sans-serif; border: none; outline: none; border-radius: 999px; background: transparent; color: rgb(240,240,240); }
+.sr-landing-email::placeholder { color: var(--sr-muted); }
+.sr-landing-foot { position: fixed; left: 0; right: 0; bottom: 14px; z-index: 80; display: flex; justify-content: center; gap: 8px; white-space: nowrap; font-size: 12px; font-weight: 500; letter-spacing: .01em; color: rgb(142,142,147); }
+.sr-landing-foot a { color: inherit; text-decoration: none; }

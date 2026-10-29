@@ -14,7 +14,7 @@ const MINCOL = 260, GAP = 4, PAD = 14;
 
 export function BinView() {
   const q = useStore(s => s.ui.search.trim().toLowerCase());
-  const binned = useStore(useShallow(s => Object.values(s.notes).filter(n => n.deletedAt && !(n.parentId && s.notes[n.parentId]?.deletedAt)).sort((a, b) => (b.deletedAt ?? 0) - (a.deletedAt ?? 0))));
+  const binned = useStore(useShallow(s => Object.values(s.notes).filter(n => n.deletedAt && (n.parentId ?? null) === s.ui.openFolderId).sort((a, b) => (b.deletedAt ?? 0) - (a.deletedAt ?? 0))));
   const shown = useMemo(() => binned.filter(n => !q || (n.title + ' ' + n.text + ' ' + (n.metadata.linkTitle ?? '')).toLowerCase().includes(q)), [binned, q]);
   const restore = useStore(s => s.restore);
   const [focus, setFocusRaw] = useState<string | null>(null);

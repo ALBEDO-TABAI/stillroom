@@ -3,7 +3,7 @@
 # → ad-hoc sign (rcodesign) → re-zip keeping symlinks → 25 MB parts + md5.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-OUT=${OUT:-/workspace/dist-parts}; NAME=${NAME:-stillroom-mac-arm64-v1}
+OUT=${OUT:-/workspace/dist-parts}; NAME=${NAME:-stillroom-mac-arm64-v2}
 RCODESIGN=${RCODESIGN:-/home/box/tools/rcodesign}
 npm run build >/dev/null
 cd desktop && rm -rf release && npm run dist:mac

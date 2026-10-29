@@ -22,7 +22,8 @@ export function CanvasMenu() {
   const add = (type: 'text' | 'folder') => {
     const st = useStore.getState();
     const n = blankNote(type, wx - 130, wy - (type === 'folder' ? 130 : 33));
-    if (type === 'folder') n.title = 'New folder';
+    if (type === 'folder') n.title = 'New Folder';
+    else n.metadata = { titleLevel: 'p' }; // frameless paragraph text, caret in the title, "T" in the inline pill
     st.add(n, { select: true }); close();
     if (type === 'text') setUI({ editingId: n.id, menu: null });
   };
@@ -37,7 +38,7 @@ export function CanvasMenu() {
           style={{ pointerEvents: 'auto', position: 'absolute', left: sx, top: sy + CTX_R, transform: 'translateX(-50%)', transformOrigin: 'center top', ...from({ y: -10 }) }}><Icon name="camera" /></button>
         <button title="Folder" className={btn({ icon: true, surface: 'solid' }) + ' sr-in'} onPointerDown={e => e.stopPropagation()} onClick={() => add('folder')}
           style={{ pointerEvents: 'auto', position: 'absolute', left: sx - CTX_R, top: sy, transform: 'translate(-100%, -50%)', transformOrigin: 'right center', ...from({ x: 10 }) }}><Icon name="folder" /></button>
-        <input ref={file} type="file" accept="image/*,video/*,audio/*" capture="environment" multiple hidden
+        <input ref={file} type="file" accept="image/*,audio/*" capture="environment" multiple hidden
           onChange={e => { if (e.target.files) addFiles([...e.target.files], { x: wx, y: wy }); close(); }} />
       </div>
     </div>

@@ -39,11 +39,7 @@ export async function addFiles(files: File[], at: { x: number; y: number }) {
       n.mediaUrl = await putBlob(`${n.id}-img`, f);
       st.add(n); made.push(n.id); x += dw + st.prefs.gap;
     } else if (f.type.startsWith('video/')) {
-      const m = await mediaMeta(f, 'video');
-      const n = blankNote('video', x, y, { title: f.name.replace(/\.[^.]+$/, ''), duration: fmtDur(m.d), metadata: { aspectRatio: +(m.h / (m.w || 16)).toFixed(4), displayWidth: 320, originalFilename: f.name, fileSize: f.size } });
-      n.mediaUrl = await putBlob(`${n.id}-vid`, f);
-      if (m.poster) n.metadata.poster = await putBlob(`${n.id}-poster`, m.poster);
-      st.add(n); made.push(n.id); x += 320 + st.prefs.gap;
+      continue; // like the original: dropped video files are ignored (no module is created)
     } else if (f.type.startsWith('audio/')) {
       const m = await mediaMeta(f, 'audio');
       const n = blankNote('audio', x, y, { title: f.name.replace(/\.[^.]+$/, ''), duration: fmtDur(m.d), metadata: { originalFilename: f.name, fileSize: f.size } });

@@ -101,6 +101,8 @@ export const useStore = create<State>((set, get) => ({
   }),
   add: (n, opts) => {
     get().checkpoint();
+    // a module made while a folder is open lives on that folder's canvas
+    if (!n.parentId && get().ui.openFolderId && n.id !== get().ui.openFolderId) n = { ...n, parentId: get().ui.openFolderId };
     set(st => ({ notes: { ...st.notes, [n.id]: n }, order: [...st.order, n.id], selected: opts?.select ? [n.id] : st.selected }));
   },
   update: (id, patch) => set(st => {
@@ -177,9 +179,11 @@ export const useStore = create<State>((set, get) => ({
   rect: id => rectOf(get().notes[id], get().sizes),
 }));
 
-/** Visible (not binned, not inside a folder) modules in paint order. */
-export const liveIds = (s: Pick<State, 'notes' | 'order'>) =>
-  s.order.filter(id => { const n = s.notes[id]; return n && !n.deletedAt && !n.parentId; });
+/** Modules on the current canvas (root or the open folder's sub-canvas), not binned, in paint order. */
+export const liveIds = (s: Pick<State, 'notes' | 'order'>, folder: string | null = useStore.getState().ui.openFolderId) =>
+  s.order.filter(id => { const n = s.notes[id]; return n && !n.deletedAt && (n.parentId ?? null) === folder; });
+/** Root → current folder chain. */
+export const folderPath = (s: Pick<State, 'notes'>, id: string | null): string[] => { const out: string[] = []; let c = id; while (c && s.notes[c] && out.length < 32) { out.unshift(c); c = s.notes[c].parentId; } return out; };
 
 let seq = 0;
 export const newId = () => `${Date.now()}${String(seq++ % 1000).padStart(3, '0')}`;

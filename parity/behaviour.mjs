@@ -2,7 +2,7 @@
 import { chromium } from 'playwright';
 import fs from 'fs';
 const BASE = process.env.BASE || 'http://127.0.0.1:5410/';
-const b = await chromium.launch({ executablePath: '/home/box/.cache/ms-playwright/chromium-1208/chrome-linux64/chrome', args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream'] });
+const b = await chromium.launch({ executablePath: '/home/box/.cache/ms-playwright/chromium-1248/chrome-linux64/chrome', args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream'] });
 const results = [];
 const check = async (name, fn) => {
   const ctx = await b.newContext({ viewport: { width: 1440, height: 900 }, permissions: ['microphone', 'clipboard-read', 'clipboard-write'] });
@@ -136,7 +136,7 @@ await check('paste a URL and plain text from the clipboard', async (p, { S }) =>
   const ns = Object.values((await S()).notes);
   return { ok: ns.some(n => n.type === 'link' && n.metadata.domain === 'stillroom.test') && ns.some(n => n.title === 'A pasted idea' && /body line/.test(n.text)) };
 });
-await check('drop image + video + audio files creates media modules (IndexedDB)', async (p, { S }) => {
+await check('drop image + video + audio: image and audio become modules, video is ignored (IndexedDB)', async (p, { S }) => {
   const files = [['pebble-sand.jpg', 'image/jpeg'], ['pebble-breath.mp4', 'video/mp4'], ['idea.mp3', 'audio/mpeg']].map(([f, t]) => ({ name: f, type: t, b64: fs.readFileSync(new URL('../public/fixtures/' + f, import.meta.url)).toString('base64') }));
   const dt = await p.evaluateHandle(fs_ => { const dt = new DataTransfer(); for (const f of fs_) { const bin = Uint8Array.from(atob(f.b64), c => c.charCodeAt(0)); dt.items.add(new File([bin], f.name, { type: f.type })); } return dt; }, files);
   await p.dispatchEvent('.sr-app', 'drop', { dataTransfer: dt, clientX: 1100, clientY: 780 });
@@ -144,7 +144,7 @@ await check('drop image + video + audio files creates media modules (IndexedDB)'
   const ns = Object.values((await S()).notes).filter(n => (n.mediaUrl || n.audioUrl || '').startsWith('idb:'));
   const types = ns.map(n => n.type).sort();
   const imgOk = await p.evaluate(() => [...document.querySelectorAll('.sr-media img')].some(i => i.src.startsWith('blob:') && i.naturalWidth > 0));
-  return { ok: types.join() === 'audio,image,video' && imgOk, types, imgOk };
+  return { ok: types.join() === 'audio,image' && imgOk, types, imgOk };
 });
 await check('record a voice module (fake microphone) and play it back', async (p, { S }) => {
   await p.click('button[aria-label="Record a voice module"]'); await p.waitForTimeout(1600);
@@ -202,7 +202,7 @@ await check('persistence: modules and camera survive a reload (normal mode)', as
   await p.goto(BASE + '?theme=dark'); await p.evaluate(() => localStorage.clear()); await p.reload(); await p.waitForSelector('[data-card]');
   await p.mouse.click(1000, 820, { button: 'right' }); await p.click('button[title="Folder"]'); await p.waitForTimeout(600);
   await p.reload(); await p.waitForSelector('[data-card]'); await p.waitForTimeout(300);
-  return { ok: Object.values((await S()).notes).some(n => n.type === 'folder' && n.title === 'New folder') };
+  return { ok: Object.values((await S()).notes).some(n => n.type === 'folder' && n.title === 'New Folder') };
 });
 await check('voice + video fixtures render (?fixture=media)', async (p) => {
   await p.goto(BASE + '?fixture=media&theme=dark'); await p.waitForSelector('[data-note-id="s-voice"]');
@@ -230,6 +230,41 @@ await check('bin: Clear All asks, then empties the bin; empty bin hides Clear Al
   const gone = !(await S()).notes['a5']; const hidden = (await p.$('button:has-text("Clear All")')) === null;
   await p.click('button[aria-label="Bin"]');
   return { ok: /Permanently delete/.test(asked) && gone && hidden, asked, gone, hidden };
+});
+await check('folders are sub-canvases: crumb pills, own modules + bin, @handle goes back up, nested folders', async (p, { S, card }) => {
+  await p.goto(BASE + '?fixture=account&theme=dark'); await p.waitForSelector('[data-card]');
+  const a = await card('a1'); const f = await card('a2'); const x0 = (await S()).notes.a1.canvasX;
+  await p.mouse.move(a.x, a.y); await p.mouse.down(); await p.mouse.move(f.x, f.y, { steps: 12 }); await p.mouse.up(); await p.waitForTimeout(300);
+  await p.click('button[data-bc-pill]'); await p.waitForTimeout(250); await p.click('button[data-bc-col-pill]'); await p.waitForTimeout(400);
+  const inside = await p.$$eval('[data-card]', es => es.map(e => e.getAttribute('data-note-id')));
+  const pills = await p.$$eval('button[data-bc-pill]', es => es.map(e => e.textContent));
+  await p.mouse.click(300, 700, { button: 'right' }); await p.click('button[title="Folder"]'); await p.waitForTimeout(300);
+  const sub = Object.values((await S()).notes).find(n => n.type === 'folder' && n.title === 'New Folder');
+  await p.click('button[data-bc-folder="a2"]'); await p.waitForTimeout(250);
+  await p.click('button[data-bc-col-pill]'); await p.waitForTimeout(300);
+  const pills2 = await p.$$eval('button[data-bc-pill]', es => es.map(e => e.textContent));
+  await p.click('button[data-bc-folder="a2"]'); await p.waitForTimeout(250); const up1 = (await S()).ui.openFolderId;
+  await p.click('button[data-bc-pill]'); await p.waitForTimeout(250); const up2 = (await S()).ui.openFolderId;
+  const ok = inside.join() === 'a1' && (await S()).notes.a1.canvasX === x0 && pills.length === 2 && sub?.parentId === 'a2' && pills2.length === 3 && up1 === 'a2' && up2 === null;
+  return { ok, inside, pills, pills2, subParent: sub?.parentId, up1, up2 };
+});
+await check('canvas menu Text: frameless paragraph text with the "T" level button', async (p, { S }) => {
+  await p.goto(BASE + '?fixture=account&theme=dark'); await p.waitForSelector('[data-card]');
+  await p.mouse.click(1250, 120, { button: 'right' }); await p.click('button[title="Text"]'); await p.waitForTimeout(300);
+  const t = await p.textContent('button[title="Text level"]', { timeout: 3000 }).catch(() => null);
+  await p.keyboard.type('Test note'); await p.keyboard.press('Escape'); await p.waitForTimeout(200);
+  const n = Object.values((await S()).notes).find(n => n.title === 'Test note');
+  return { ok: n?.metadata.titleLevel === 'p' && !n.metadata.packed && t === 'T', level: n?.metadata.titleLevel, t };
+});
+await check('signed-out landing: Sign in → local sign-in; Request access is saved locally (no network)', async (p) => {
+  await p.goto(BASE + '#/welcome'); await p.waitForSelector('[data-landing]', { timeout: 5000 });
+  const reqs = []; p.on('request', r => { const u = r.url(); if (!u.startsWith(BASE) && !u.startsWith('data:') && !u.startsWith('blob:')) reqs.push(u); });
+  await p.fill('input[aria-label="Email"]', 'tester@example.com', { timeout: 3000 }); await p.click('button:has-text("Request access")', { timeout: 3000 }); await p.waitForTimeout(300);
+  const saved = await p.evaluate(() => localStorage.getItem('sr-access-requests'));
+  await p.click('a:has-text("Sign in")', { timeout: 3000 }); await p.waitForTimeout(300);
+  await p.fill('input[aria-label="Name"]', 'tester', { timeout: 3000 }); await p.click('button:has-text("Open canvas")', { timeout: 3000 }); await p.waitForSelector('[data-card]', { timeout: 5000 });
+  const user = await p.evaluate(() => window.__sr.getState().username);
+  return { ok: /tester@example.com/.test(saved) && user === 'tester' && reqs.length === 0, saved, user, reqs };
 });
 fs.mkdirSync(new URL('../docs/parity/', import.meta.url).pathname, { recursive: true });
 fs.writeFileSync(new URL('../docs/parity/behaviour.json', import.meta.url).pathname, JSON.stringify(results, null, 1));

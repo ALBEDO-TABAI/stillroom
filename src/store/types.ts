@@ -2,6 +2,7 @@ export type NoteType = 'text' | 'image' | 'link' | 'folder' | 'audio' | 'video';
 export type Dock = { l?: string; t?: string } | null;
 export interface NoteMeta {
   transcribing?: boolean; cooling?: boolean;
+  titleLevel?: 'p';   // "T": the title is set as a paragraph (12px), not a heading
   dock?: Dock;
   packed?: boolean;
   titleAlign?: 'left' | 'center' | 'right';

@@ -12,7 +12,7 @@ const size = (process.env.SIZE || '1440x900').split('x').map(Number);
 const suffix = process.env.SIZE ? '_' + process.env.SIZE : '';
 const OUT = new URL('../docs/parity/ours/', import.meta.url).pathname;
 fs.mkdirSync(OUT, { recursive: true });
-const b = await chromium.launch({ executablePath: '/home/box/.cache/ms-playwright/chromium-1208/chrome-linux64/chrome' });
+const b = await chromium.launch({ executablePath: '/home/box/.cache/ms-playwright/chromium-1248/chrome-linux64/chrome' });
 for (const theme of themes) for (const [name, fn] of Object.entries(STATES)) {
   if (only && !only.test(name)) continue;
   const ctx = await b.newContext({ viewport: { width: size[0], height: size[1] }, deviceScaleFactor: 1 });

@@ -4,13 +4,13 @@ Unsigned test build of the Electron wrapper (`desktop/`), arm64 only, ad-hoc sig
 
 ## Get the app
 
-The zip is split into 25 MB parts: `stillroom-mac-arm64-v1.zip.part00` … `part04`, plus `MD5SUMS-stillroom-mac-arm64-v1.txt`.
+The zip is split into 25 MB parts: `stillroom-mac-arm64-v2.zip.part00` … `part04`, plus `MD5SUMS-stillroom-mac-arm64-v2.txt`.
 
 ```bash
-md5 -r stillroom-mac-arm64-v1.zip.part*          # compare with MD5SUMS-stillroom-mac-arm64-v1.txt
-cat stillroom-mac-arm64-v1.zip.part* > stillroom-mac-arm64-v1.zip
-md5 -r stillroom-mac-arm64-v1.zip                # should match the .zip line
-ditto -x -k stillroom-mac-arm64-v1.zip .         # keeps the framework symlinks (Finder unzip also works)
+md5 -r stillroom-mac-arm64-v2.zip.part*          # compare with MD5SUMS-stillroom-mac-arm64-v2.txt
+cat stillroom-mac-arm64-v2.zip.part* > stillroom-mac-arm64-v2.zip
+md5 -r stillroom-mac-arm64-v2.zip                # should match the .zip line
+ditto -x -k stillroom-mac-arm64-v2.zip .         # keeps the framework symlinks (Finder unzip also works)
 xattr -dr com.apple.quarantine Stillroom.app     # unsigned build: clear the download quarantine
 open Stillroom.app
 ```

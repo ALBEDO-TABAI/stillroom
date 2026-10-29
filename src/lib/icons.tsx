@@ -21,6 +21,7 @@ const P: Record<string, React.ReactNode> = {
   chevron: <path d="M6.2 3.6L10.6 8l-4.4 4.4" />,
   chevronDown: <path d="M4 6.4l4 4 4-4" />,
   heading: <><path d="M3 3.5v9M9 3.5v9M3 8h6" /><path d="M11.4 7.2l1.6-1v6.3" /></>,
+  frame: <rect x="4.2" y="4.2" width="7.6" height="7.6" rx="2" />,
   list: <><circle cx="3.3" cy="4.5" r=".7" fill="currentColor" stroke="none" /><circle cx="3.3" cy="8" r=".7" fill="currentColor" stroke="none" /><circle cx="3.3" cy="11.5" r=".7" fill="currentColor" stroke="none" /><path d="M6 4.5h7.5M6 8h7.5M6 11.5h7.5" /></>,
   weight: <path d="M4 13L8 3l4 10M5.6 9.2h4.8" />,
   align: <path d="M2.5 4h11M2.5 8h7.5M2.5 12h11" />,
