@@ -67,7 +67,7 @@ export interface State {
 }
 
 export const DEFAULT_PREFS: Prefs = {
-  dark: true, gap: 12, snapRadius: 26, smartGuides: true, magneticSnap: true, adaptiveScale: true,
+  dark: false, gap: 12, snapRadius: 26, smartGuides: true, magneticSnap: true, adaptiveScale: true,
   autoTranscribe: true, imageRounded: true, storeLocally: true, playbackSpeed: 1,
 };
 

@@ -21,7 +21,7 @@ export function ImageCard({ note, w }: { note: Note; w: number }) {
     ? { width: h, height: w, left: (w - h) / 2, top: (h - w) / 2, transform: `rotate(${rot * 90}deg)`, objectPosition: pos }
     : { transform: rot ? `rotate(${rot * 90}deg)` : undefined, objectPosition: pos };
   return (
-    <div className="sr-media" style={{ width: w, height: h, ['--sr-media-r' as any]: rounded ? '24px' : '0px' }}>
+    <div className="sr-media" style={{ width: w, height: h, ['--sr-media-r' as any]: rounded ? 'var(--sr-media-radius, 24px)' : '0px' }}>
       {src && <img className="sr-under" src={src} alt="" draggable={false} style={imgStyle} />}
       {src && <img src={src} alt={note.title} draggable={false} style={imgStyle} />}
     </div>
@@ -36,7 +36,7 @@ export function VideoCard({ note, w }: { note: Note; w: number }) {
   const v = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
   return (
-    <div className="sr-media" style={{ width: w, height: h, ['--sr-media-r' as any]: rounded ? '24px' : '0px' }}>
+    <div className="sr-media" style={{ width: w, height: h, ['--sr-media-r' as any]: rounded ? 'var(--sr-media-radius, 24px)' : '0px' }}>
       {src && <video ref={v} src={src} poster={poster} muted loop playsInline preload="metadata" onEnded={() => setPlaying(false)} />}
       <button className={'sr-play sr-center-play' + (playing ? ' is-on' : '')} onPointerDown={e => e.stopPropagation()}
         onClick={e => { e.stopPropagation(); const el = v.current; if (!el) return; if (el.paused) { el.play(); setPlaying(true); } else { el.pause(); setPlaying(false); } }}>

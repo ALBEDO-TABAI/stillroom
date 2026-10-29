@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Icon } from '../lib/icons';
 import { useStore, blankNote } from '../store/store';
 import { putBlob } from '../store/blobs';
 import { toWorld } from '../canvas/camera';
@@ -70,6 +71,7 @@ export function RecordButton({ mobile = false }: { mobile?: boolean }) {
             disabled={!!phase}
             style={phase ? { opacity: 0, transform: 'scale(0)', pointerEvents: 'none' } : undefined}
             onClick={() => (rec ? stop() : start())}>
+            {!rec && <><i className="sr-record-led" aria-hidden="true" /><Icon name="mic" size={18} /><span>Record</span></>}
             {rec && <><span className="sr-rec-dot" /><span style={{ fontVariantNumeric: 'tabular-nums' }}>{fmtDur(t)}</span></>}
           </button>
         </div>

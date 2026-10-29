@@ -20,9 +20,10 @@ export function App({ demo }: { demo: boolean }) {
     const dark_ = dark;
     { const dark = dark_ || route === 'welcome'; // the signed-out landing is always dark (as measured)
     document.documentElement.dataset.theme = dark ? 'dark' : 'light';
-    document.documentElement.style.backgroundColor = dark ? '#000000' : '#E5E5EA';
-    document.body.style.backgroundColor = dark ? '#000000' : '#E5E5EA';
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#000000' : '#E5E5EA'); }
+    const background = getComputedStyle(document.documentElement).getPropertyValue('--sr-canvas').trim();
+    document.documentElement.style.backgroundColor = background;
+    document.body.style.backgroundColor = background;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', background); }
   }, [dark, route]);
   if (route === 'welcome') return <Welcome />;
   return <Workspace demo={demo} />;

@@ -6,6 +6,7 @@ import './styles/tokens.css';
 import './styles/button.css';
 import './styles/canvas.css';
 import './styles/chrome.css';
+import './styles/studio.css';
 import { App } from './App';
 import { useStore } from './store/store';
 import { loadNotes, loadCam, loadPrefs, loadUser, loadFolder, startPersistence, storageIssue } from './store/persist';
