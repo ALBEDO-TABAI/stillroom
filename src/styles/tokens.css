@@ -1,0 +1,72 @@
+/* Stillroom design tokens. Values match the measured reference; see docs/SPEC.md §2.
+   Two materials (glass, solid), two tints, three inks, one accent. */
+:root, [data-theme="light"] {
+  --sr-glass:       rgba(218,218,222,0.70);
+  --sr-glass-on:    rgba(200,200,206,0.72);
+  --sr-glass-press: rgba(186,186,192,0.74);
+  --sr-solid:       #DADADE;
+  --sr-solid-on:    #C8C8CC;
+  --sr-tint:        rgba(0,0,0,0.04);
+  --sr-tint-on:     rgba(0,0,0,0.06);
+  --sr-text:        #111111;
+  --sr-muted:       #6D6D72;
+  --sr-faint:       #AEAEB2;
+  --sr-canvas:      #E5E5EA;
+  --sr-card:        #FFFFFF;
+  --sr-card-ink:    #212121;
+  --sr-cluster:     rgba(0,0,0,0.14);
+  --sr-window:      rgba(255,255,255,0.7);
+  --sr-arc-rgb:     0,0,0;
+}
+[data-theme="dark"] {
+  --sr-glass:       rgba(44,44,46,0.60);
+  --sr-glass-on:    rgba(58,58,62,0.62);
+  --sr-glass-press: rgba(74,74,78,0.64);
+  --sr-solid:       #2C2C2E;
+  --sr-solid-on:    #3A3A3C;
+  --sr-tint:        rgba(255,255,255,0.06);
+  --sr-tint-on:     rgba(255,255,255,0.10);
+  --sr-text:        #F0F0F0;
+  --sr-muted:       #8E8E93;
+  --sr-faint:       #7C7C7E;
+  --sr-canvas:      #000000;
+  --sr-card:        #141414;
+  --sr-card-ink:    #F5F5F5;
+  --sr-cluster:     rgba(255,255,255,0.18);
+  --sr-window:      rgba(20,20,20,0.6);
+  --sr-arc-rgb:     255,255,255;
+}
+:root { --sr-accent: #FFA000; --sr-destructive: #FF3B30; --sr-blur: blur(30px) saturate(160%); }
+
+/* Motion — six durations, three curves (SPEC §5). */
+:root {
+  --sr-hover:  120ms;
+  --sr-menu:   180ms;
+  --sr-travel: 260ms;
+  --sr-chrome: 340ms;
+  --sr-camera: 520ms;
+  --sr-exit:   200ms;
+  --sr-menu-ease:   cubic-bezier(0.2,0.8,0.2,1);
+  --sr-settle-ease: cubic-bezier(0.22,1,0.36,1);
+  --sr-exit-ease:   cubic-bezier(0.4,0,0.2,1);
+}
+@media (prefers-reduced-motion: reduce) {
+  :root { --sr-hover: .001ms; --sr-menu: .001ms; --sr-travel: .001ms; --sr-chrome: .001ms; --sr-camera: .001ms; --sr-exit: .001ms; }
+}
+
+html, body { overflow: clip; }
+html, body, #root { height: 100%; }
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+::selection { background: rgba(130,130,130,0.40); }
+[data-theme="dark"] ::selection { background: rgba(255,255,255,0.30); }
+[data-sr-weight="300"] { font-weight: 300; }
+[data-sr-weight="400"] { font-weight: 400; }
+[data-sr-weight="500"] { font-weight: 500; }
+
+@keyframes srIn  { from { opacity: 0; translate: var(--sr-in-t, 0 0); scale: var(--sr-in-s, 1); } to { opacity: 1; translate: 0 0; scale: 1; } }
+@keyframes srOut { from { opacity: 1; translate: 0 0; scale: 1; } to { opacity: 0; translate: var(--sr-in-t, 0 0); scale: var(--sr-in-s, 1); } }
+.sr-in  { animation: srIn var(--sr-menu) var(--sr-menu-ease) both; }
+.sr-out { animation: srOut var(--sr-exit) var(--sr-exit-ease) both; pointer-events: none !important; }
+.sr-in--chrome { animation-duration: var(--sr-chrome); animation-timing-function: var(--sr-settle-ease); }
+:root, [data-theme="light"] { --sr-sub: rgba(0,0,0,0.035); --sr-toggle-off: #CFCED3; --sr-knob: #FFFFFF; --sr-knob-border: rgba(0,0,0,0.12); }
+[data-theme="dark"] { --sr-sub: rgba(255,255,255,0.04); --sr-toggle-off: #3A3A3C; --sr-knob: #EDEDED; --sr-knob-border: rgba(255,255,255,0.18); }

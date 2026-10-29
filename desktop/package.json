@@ -1,0 +1,9 @@
+{
+  "name": "stillroom-desktop", "private": true, "version": "1.0.0", "main": "dist/main.cjs",
+  "description": "Stillroom desktop", "author": "Stillroom", "productName": "Stillroom",
+  "scripts": {
+    "build": "node build.mjs", "start": "node build.mjs && electron .",
+    "dist:mac": "node build.mjs && electron-builder --mac zip --arm64"
+  },
+  "devDependencies": { "electron": "44.9.3", "electron-builder": "^26.18.0", "esbuild": "^0.25.0" }
+}

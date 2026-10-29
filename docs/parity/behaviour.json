@@ -1,0 +1,142 @@
+[
+ {
+  "name": "drag module snaps to neighbour with the gap and docks",
+  "ok": true,
+  "detail": "{\"ok\":true,\"x\":503,\"y\":-224,\"dock\":null}"
+ },
+ {
+  "name": "shift-drag moves without snap",
+  "ok": true,
+  "detail": "{\"ok\":true,\"x\":507,\"y\":-220}"
+ },
+ {
+  "name": "marquee selects several modules; P gallery layout rearranges them",
+  "ok": true,
+  "detail": "{\"ok\":true,\"selected\":4,\"moved\":4}"
+ },
+ {
+  "name": "L organic layout and R scatter, then undo restores",
+  "ok": true,
+  "detail": "{\"ok\":true,\"changed\":true,\"back\":true}"
+ },
+ {
+  "name": "delete to bin, restore from bin",
+  "ok": true,
+  "detail": "{\"ok\":true,\"gone\":true}"
+ },
+ {
+  "name": "bin mode: delete → Bin shows it in a masonry view, Restore brings it back (normal mode)",
+  "ok": true,
+  "detail": "{\"ok\":true,\"inView\":true,\"ph\":\"Search in Bin\",\"noRecord\":true,\"still\":true,\"restored\":true,\"back\":true}"
+ },
+ {
+  "name": "new account canvas: welcome, where-to-start list, empty folder, pictures, covered link (normal mode)",
+  "ok": true,
+  "detail": "{\"ok\":true,\"ids\":\"a1,a2,a3,a4,a5,a6\",\"cover\":true,\"list\":5,\"handle\":\"@someone\"}"
+ },
+ {
+  "name": "search: pill widens to 420, results show highlighted match, preview and date; Enter frames it",
+  "ok": true,
+  "detail": "{\"ok\":true,\"w1\":260,\"w2\":420,\"hit\":\"Where\",\"meta\":\"Oct 29, 1:44 PM\"}"
+ },
+ {
+  "name": "handle opens the folder column; picking a folder opens it",
+  "ok": true,
+  "detail": "{\"ok\":true,\"open\":\"a2\"}"
+ },
+ {
+  "name": "inline edit shows the format pill and Contain; Align and Contain change the module",
+  "ok": true,
+  "detail": "{\"ok\":true,\"pill\":true,\"al\":\"right\",\"packed\":true}"
+ },
+ {
+  "name": "right-click canvas → Text creates and edits a new module",
+  "ok": true,
+  "detail": "{\"ok\":true,\"n\":\"1793249065767000\"}"
+ },
+ {
+  "name": "right-click canvas → Link → paste URL creates a link module",
+  "ok": true,
+  "detail": "{\"ok\":true}"
+ },
+ {
+  "name": "right-click canvas → Folder; drag a module into it",
+  "ok": true,
+  "detail": "{\"ok\":true,\"count\":\"1 module\"}"
+ },
+ {
+  "name": "double-click packed text opens the editor; typing updates the module",
+  "ok": true,
+  "detail": "{\"ok\":true,\"text\":\"<h1>Organize your thoughts and ideas into a convenient layout in a single move. Select a few and press L or P to organiz\"}"
+ },
+ {
+  "name": "double-click unpacked text edits inline on the canvas",
+  "ok": true,
+  "detail": "{\"ok\":true,\"title\":\"No AI to babysit. Really.\"}"
+ },
+ {
+  "name": "paste a URL and plain text from the clipboard",
+  "ok": true,
+  "detail": "{\"ok\":true}"
+ },
+ {
+  "name": "drop image + video + audio files creates media modules (IndexedDB)",
+  "ok": true,
+  "detail": "{\"ok\":true,\"types\":[\"audio\",\"image\",\"video\"],\"imgOk\":true}"
+ },
+ {
+  "name": "record a voice module (fake microphone) and play it back",
+  "ok": true,
+  "detail": "{\"ok\":true,\"duration\":\"0:01\"}"
+ },
+ {
+  "name": "keyboard: +/− zoom, H reset, F focus, C centre, arrows move selection, ] [ layers",
+  "ok": true,
+  "detail": "{\"ok\":true,\"z0\":0.7414814814814815,\"z1\":0.8304592592592593,\"z2\":0.662037037037037,\"sel\":\"1783357657915456\",\"o0\":9,\"o1\":15,\"cz\":3}"
+ },
+ {
+  "name": "wheel: trackpad-like pans, mouse wheel notches zoom, ctrl+wheel pinches",
+  "ok": true,
+  "detail": "{\"ok\":true,\"c0\":{\"x\":668,\"y\":494,\"z\":0.7414814814814815},\"c1\":{\"x\":638,\"y\":474,\"z\":0.7414814814814815},\"c2\":{\"x\":619.8249140689112,\"y\":479.3195373456845,\"z\":0.9058289161429075},\"c3\":{\"x\":627.8389209433983,\"y\":476.97397435802975,\"z\":0.8333626028514749}}"
+ },
+ {
+  "name": "axis menu: Info shows module info; Download → .md file",
+  "ok": true,
+  "detail": "{\"ok\":true,\"md\":\"# Bring order\\n\\nThe space helps you do it. Snap a few togethe\"}"
+ },
+ {
+  "name": "settings: gap slider and rounded corners toggle take effect; theme toggle",
+  "ok": true,
+  "detail": "{\"ok\":true,\"r\":\"0px\",\"theme\":\"light\"}"
+ },
+ {
+  "name": "search finds a module and frames it",
+  "ok": true,
+  "detail": "{\"ok\":true,\"sel\":[\"916\"],\"z\":1.6}"
+ },
+ {
+  "name": "slideshow: Enter opens, arrows step, Esc closes",
+  "ok": true,
+  "detail": "{\"ok\":true}"
+ },
+ {
+  "name": "persistence: modules and camera survive a reload (normal mode)",
+  "ok": true,
+  "detail": "{\"ok\":true}"
+ },
+ {
+  "name": "voice + video fixtures render (?fixture=media)",
+  "ok": true,
+  "detail": "{\"ok\":true}"
+ },
+ {
+  "name": "audio drop: transcribing card (orange breathe, cycling phrase) then crystallize + cooling",
+  "ok": true,
+  "detail": "{\"ok\":true,\"t1\":\"Capturing thoughts...\",\"anim\":\"radial-gradient(circle, rgb(255, 160, 0), rgb(255, 160, 0))\"}"
+ },
+ {
+  "name": "bin: Clear All asks, then empties the bin; empty bin hides Clear All",
+  "ok": true,
+  "detail": "{\"ok\":true,\"asked\":\"Permanently delete all items in Bin? This cannot be undone.\",\"gone\":true,\"hidden\":true}"
+ }
+]

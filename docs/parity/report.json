@@ -1,0 +1,821 @@
+{
+ "base_dark": {
+  "pixel": 99.48,
+  "geo": {
+   "matched": 20,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "axis_card_dark": {
+  "pixel": 98.83,
+  "geo": {
+   "matched": 24,
+   "within2px": 100,
+   "meanMaxDelta": 0.01,
+   "missing": []
+  }
+ },
+ "center_C_dark": {
+  "pixel": 99.75,
+  "geo": {
+   "matched": 10,
+   "within2px": 100,
+   "meanMaxDelta": 0.3,
+   "missing": []
+  }
+ },
+ "ctx_canvas_dark": {
+  "pixel": 98.92,
+  "geo": {
+   "matched": 24,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "download_menu_dark": {
+  "pixel": 98.83,
+  "geo": {
+   "matched": 27,
+   "within2px": 100,
+   "meanMaxDelta": 0.01,
+   "missing": []
+  }
+ },
+ "editor_text_dark": {
+  "pixel": 99.46,
+  "geo": {
+   "matched": 24,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "focus_mode_dark": {
+  "pixel": 99.5,
+  "geo": {
+   "matched": 20,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "folder_open_dark": {
+  "pixel": 98.86,
+  "geo": {
+   "matched": 19,
+   "within2px": 100,
+   "meanMaxDelta": 0.09,
+   "missing": []
+  }
+ },
+ "hover_text_dark": {
+  "pixel": 99.47,
+  "geo": {
+   "matched": 20,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "image_select_dark": {
+  "pixel": 99.48,
+  "geo": {
+   "matched": 20,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "info_card_dark": {
+  "pixel": 98.86,
+  "geo": {
+   "matched": 20,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "link_hover_dark": {
+  "pixel": 99.47,
+  "geo": {
+   "matched": 20,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "new_text_dark": {
+  "pixel": 98.92,
+  "geo": {
+   "matched": 27,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "pan_dark": {
+  "pixel": 99.58,
+  "geo": {
+   "matched": 20,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "record_hover_dark": {
+  "pixel": 99.48,
+  "geo": {
+   "matched": 20,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "select_text_dark": {
+  "pixel": 99.47,
+  "geo": {
+   "matched": 20,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "slideshow_dark": {
+  "pixel": 98.69,
+  "geo": {
+   "matched": 20,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "usermenu_canvas_dark": {
+  "pixel": 99.41,
+  "geo": {
+   "matched": 36,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "usermenu_dark": {
+  "pixel": 99.21,
+  "geo": {
+   "matched": 36,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "usermenu_modules_dark": {
+  "pixel": 99.39,
+  "geo": {
+   "matched": 36,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "usermenu_shortcuts_dark": {
+  "pixel": 99.22,
+  "geo": {
+   "matched": 37,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "zoom_in_dark": {
+  "pixel": 98.93,
+  "geo": {
+   "matched": 20,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "zoom_out_dark": {
+  "pixel": 99.73,
+  "geo": {
+   "matched": 20,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "axis_card_light": {
+  "pixel": 98.88,
+  "geo": {
+   "matched": 24,
+   "within2px": 100,
+   "meanMaxDelta": 0.01,
+   "missing": []
+  }
+ },
+ "base_light": {
+  "pixel": 99.54,
+  "geo": {
+   "matched": 20,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "center_C_light": {
+  "pixel": 99.75,
+  "geo": {
+   "matched": 10,
+   "within2px": 100,
+   "meanMaxDelta": 0.3,
+   "missing": []
+  }
+ },
+ "ctx_canvas_light": {
+  "pixel": 98.91,
+  "geo": {
+   "matched": 24,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "download_menu_light": {
+  "pixel": 98.88,
+  "geo": {
+   "matched": 27,
+   "within2px": 100,
+   "meanMaxDelta": 0.01,
+   "missing": []
+  }
+ },
+ "editor_text_light": {
+  "pixel": 99.53,
+  "geo": {
+   "matched": 24,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "focus_mode_light": {
+  "pixel": 99.53,
+  "geo": {
+   "matched": 20,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "folder_open_light": {
+  "pixel": 98.89,
+  "geo": {
+   "matched": 19,
+   "within2px": 100,
+   "meanMaxDelta": 0.09,
+   "missing": []
+  }
+ },
+ "hover_text_light": {
+  "pixel": 99.51,
+  "geo": {
+   "matched": 20,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "image_select_light": {
+  "pixel": 99.54,
+  "geo": {
+   "matched": 20,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "info_card_light": {
+  "pixel": 98.91,
+  "geo": {
+   "matched": 20,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "link_hover_light": {
+  "pixel": 99.51,
+  "geo": {
+   "matched": 20,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "new_text_light": {
+  "pixel": 98.91,
+  "geo": {
+   "matched": 27,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "pan_light": {
+  "pixel": 99.6,
+  "geo": {
+   "matched": 20,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "record_hover_light": {
+  "pixel": 99.53,
+  "geo": {
+   "matched": 20,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "select_text_light": {
+  "pixel": 99.52,
+  "geo": {
+   "matched": 20,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "slideshow_light": {
+  "pixel": 98.61,
+  "geo": {
+   "matched": 20,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "usermenu_canvas_light": {
+  "pixel": 99.56,
+  "geo": {
+   "matched": 36,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "usermenu_light": {
+  "pixel": 99.45,
+  "geo": {
+   "matched": 36,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "usermenu_modules_light": {
+  "pixel": 99.55,
+  "geo": {
+   "matched": 36,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "usermenu_shortcuts_light": {
+  "pixel": 99.51,
+  "geo": {
+   "matched": 37,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "zoom_in_light": {
+  "pixel": 98.99,
+  "geo": {
+   "matched": 20,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "zoom_out_light": {
+  "pixel": 99.75,
+  "geo": {
+   "matched": 20,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "base_dark_1280x800": {
+  "pixel": 99.48,
+  "geo": {
+   "matched": 20,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "base_dark_1920x1080": {
+  "pixel": 99.37,
+  "geo": {
+   "matched": 20,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "base_light_1280x800": {
+  "pixel": 99.53,
+  "geo": {
+   "matched": 20,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "base_light_1920x1080": {
+  "pixel": 99.42,
+  "geo": {
+   "matched": 20,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "editor_text_dark_1280x800": {
+  "pixel": 99.5,
+  "geo": {
+   "matched": 24,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "editor_text_dark_1920x1080": {
+  "pixel": 99.51,
+  "geo": {
+   "matched": 24,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "editor_text_light_1280x800": {
+  "pixel": 99.61,
+  "geo": {
+   "matched": 24,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "editor_text_light_1920x1080": {
+  "pixel": 99.55,
+  "geo": {
+   "matched": 24,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "usermenu_dark_1280x800": {
+  "pixel": 99.4,
+  "geo": {
+   "matched": 36,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "usermenu_light_1280x800": {
+  "pixel": 99.61,
+  "geo": {
+   "matched": 36,
+   "within2px": 100,
+   "meanMaxDelta": 0,
+   "missing": []
+  }
+ },
+ "base_dark_390x844": {
+  "pixel": 99.93,
+  "geo": {
+   "matched": 0,
+   "within2px": null,
+   "meanMaxDelta": null,
+   "missing": []
+  }
+ },
+ "u_axis_text_dark": {
+  "pixel": 95.79,
+  "geo": {
+   "matched": 14,
+   "within2px": 100,
+   "meanMaxDelta": 0.03,
+   "missing": []
+  }
+ },
+ "u_axis_text_light": {
+  "pixel": 97.37,
+  "geo": {
+   "matched": 14,
+   "within2px": 100,
+   "meanMaxDelta": 0.03,
+   "missing": []
+  }
+ },
+ "u_base_dark": {
+  "pixel": 98.65,
+  "geo": {
+   "matched": 10,
+   "within2px": 100,
+   "meanMaxDelta": 0.03,
+   "missing": []
+  }
+ },
+ "u_base_light": {
+  "pixel": 98.71,
+  "geo": {
+   "matched": 10,
+   "within2px": 100,
+   "meanMaxDelta": 0.03,
+   "missing": []
+  }
+ },
+ "u_bin_center_hover_dark": {
+  "pixel": 99.98,
+  "geo": {
+   "matched": 4,
+   "within2px": 100,
+   "meanMaxDelta": 0.05,
+   "missing": []
+  }
+ },
+ "u_bin_center_hover_light": {
+  "pixel": 99.98,
+  "geo": {
+   "matched": 4,
+   "within2px": 100,
+   "meanMaxDelta": 0.05,
+   "missing": []
+  }
+ },
+ "u_bin_dark": {
+  "pixel": 99.98,
+  "geo": {
+   "matched": 4,
+   "within2px": 100,
+   "meanMaxDelta": 0.05,
+   "missing": []
+  }
+ },
+ "u_bin_light": {
+  "pixel": 99.98,
+  "geo": {
+   "matched": 4,
+   "within2px": 100,
+   "meanMaxDelta": 0.05,
+   "missing": []
+  }
+ },
+ "u_ctx_canvas_dark": {
+  "pixel": 98.63,
+  "geo": {
+   "matched": 14,
+   "within2px": 100,
+   "meanMaxDelta": 0.02,
+   "missing": []
+  }
+ },
+ "u_ctx_canvas_light": {
+  "pixel": 98.69,
+  "geo": {
+   "matched": 14,
+   "within2px": 100,
+   "meanMaxDelta": 0.02,
+   "missing": []
+  }
+ },
+ "u_editor_dark": {
+  "pixel": 98.64,
+  "geo": {
+   "matched": 10,
+   "within2px": 100,
+   "meanMaxDelta": 0.03,
+   "missing": []
+  }
+ },
+ "u_editor_light": {
+  "pixel": 98.69,
+  "geo": {
+   "matched": 10,
+   "within2px": 100,
+   "meanMaxDelta": 0.03,
+   "missing": []
+  }
+ },
+ "u_handle_dark": {
+  "pixel": 98.65,
+  "geo": {
+   "matched": 11,
+   "within2px": 100,
+   "meanMaxDelta": 0.03,
+   "missing": []
+  }
+ },
+ "u_handle_light": {
+  "pixel": 98.71,
+  "geo": {
+   "matched": 11,
+   "within2px": 100,
+   "meanMaxDelta": 0.03,
+   "missing": []
+  }
+ },
+ "u_hover_folder_dark": {
+  "pixel": 98.61,
+  "geo": {
+   "matched": 10,
+   "within2px": 100,
+   "meanMaxDelta": 0.03,
+   "missing": []
+  }
+ },
+ "u_hover_folder_light": {
+  "pixel": 98.67,
+  "geo": {
+   "matched": 10,
+   "within2px": 100,
+   "meanMaxDelta": 0.03,
+   "missing": []
+  }
+ },
+ "u_hover_link_dark": {
+  "pixel": 98.65,
+  "geo": {
+   "matched": 10,
+   "within2px": 100,
+   "meanMaxDelta": 0.03,
+   "missing": []
+  }
+ },
+ "u_hover_link_light": {
+  "pixel": 98.71,
+  "geo": {
+   "matched": 10,
+   "within2px": 100,
+   "meanMaxDelta": 0.03,
+   "missing": []
+  }
+ },
+ "u_record_hover_dark": {
+  "pixel": 98.65,
+  "geo": {
+   "matched": 10,
+   "within2px": 100,
+   "meanMaxDelta": 0.03,
+   "missing": []
+  }
+ },
+ "u_record_hover_light": {
+  "pixel": 98.71,
+  "geo": {
+   "matched": 10,
+   "within2px": 100,
+   "meanMaxDelta": 0.03,
+   "missing": []
+  }
+ },
+ "u_search_dark": {
+  "pixel": 98.36,
+  "geo": {
+   "matched": 11,
+   "within2px": 100,
+   "meanMaxDelta": 0.03,
+   "missing": []
+  }
+ },
+ "u_search_light": {
+  "pixel": 98.46,
+  "geo": {
+   "matched": 11,
+   "within2px": 100,
+   "meanMaxDelta": 0.03,
+   "missing": []
+  }
+ },
+ "u_usermenu_canvas_dark": {
+  "pixel": 98.64,
+  "geo": {
+   "matched": 26,
+   "within2px": 100,
+   "meanMaxDelta": 0.01,
+   "missing": []
+  }
+ },
+ "u_usermenu_canvas_light": {
+  "pixel": 98.7,
+  "geo": {
+   "matched": 26,
+   "within2px": 100,
+   "meanMaxDelta": 0.01,
+   "missing": []
+  }
+ },
+ "u_usermenu_dark": {
+  "pixel": 98.65,
+  "geo": {
+   "matched": 26,
+   "within2px": 100,
+   "meanMaxDelta": 0.01,
+   "missing": []
+  }
+ },
+ "u_usermenu_light": {
+  "pixel": 98.71,
+  "geo": {
+   "matched": 26,
+   "within2px": 100,
+   "meanMaxDelta": 0.01,
+   "missing": []
+  }
+ },
+ "u_usermenu_modules_dark": {
+  "pixel": 98.65,
+  "geo": {
+   "matched": 26,
+   "within2px": 100,
+   "meanMaxDelta": 0.01,
+   "missing": []
+  }
+ },
+ "u_usermenu_modules_light": {
+  "pixel": 98.71,
+  "geo": {
+   "matched": 26,
+   "within2px": 100,
+   "meanMaxDelta": 0.01,
+   "missing": []
+  }
+ },
+ "u_usermenu_usage_dark": {
+  "pixel": 98.62,
+  "geo": {
+   "matched": 26,
+   "within2px": 100,
+   "meanMaxDelta": 0.01,
+   "missing": []
+  }
+ },
+ "u_usermenu_usage_light": {
+  "pixel": 98.71,
+  "geo": {
+   "matched": 26,
+   "within2px": 100,
+   "meanMaxDelta": 0.01,
+   "missing": []
+  }
+ },
+ "u_bin_items_axis_dark": {
+  "pixel": 99.66,
+  "geo": {
+   "matched": 9,
+   "within2px": 88.9,
+   "meanMaxDelta": 0.69,
+   "missing": []
+  }
+ },
+ "u_bin_items_axis_light": {
+  "pixel": 99.73,
+  "geo": {
+   "matched": 9,
+   "within2px": 88.9,
+   "meanMaxDelta": 0.69,
+   "missing": []
+  }
+ },
+ "u_bin_items_dark": {
+  "pixel": 99.71,
+  "geo": {
+   "matched": 7,
+   "within2px": 100,
+   "meanMaxDelta": 0.03,
+   "missing": []
+  }
+ },
+ "u_bin_items_light": {
+  "pixel": 99.74,
+  "geo": {
+   "matched": 7,
+   "within2px": 100,
+   "meanMaxDelta": 0.03,
+   "missing": []
+  }
+ }
+}

@@ -1,0 +1,20 @@
+# Stillroom desktop packaging. Test builds are unsigned (ad-hoc signed afterwards for Apple Silicon).
+appId: app.stillroom.canvas
+productName: Stillroom
+copyright: Copyright © 2026 Stillroom
+directories: { output: release, buildResources: build }
+files: [dist/**, package.json, "!dist/**/*.map"]
+extraResources: [{ from: ../dist, to: renderer }]
+asar: true
+mac:
+  target: [{ target: zip, arch: [arm64] }]
+  icon: build/icon.icns
+  category: public.app-category.productivity
+  identity: null
+  hardenedRuntime: false
+  gatekeeperAssess: false
+  darkModeSupport: true
+npmRebuild: false
+nodeGypRebuild: false
+electronVersion: 44.9.3
+electronLanguages: [en, en_GB, zh_CN]
