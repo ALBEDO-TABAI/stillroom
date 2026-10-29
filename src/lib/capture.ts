@@ -1,3 +1,4 @@
+import { desktop } from '../store/persist';
 // Capture: files (pictures, video, voice), links and text arriving by drop or paste become modules.
 import { useStore, blankNote } from '../store/store';
 import { putBlob } from '../store/blobs';
@@ -30,14 +31,17 @@ function mediaMeta(file: Blob, kind: 'video' | 'audio'): Promise<{ w: number; h:
 
 export async function addFiles(files: File[], at: { x: number; y: number }) {
   const st = useStore.getState();
+  // many files land as a tidy grid (rows of up to 5), not one endless row
+  const perRow = 5; let col = 0, rowH = 0;
   let x = at.x, y = at.y; const made: string[] = [];
+  const wrap = (h: number) => { rowH = Math.max(rowH, h); if (++col >= perRow) { col = 0; x = at.x; y += rowH + st.prefs.gap; rowH = 0; } };
   for (const f of files) {
     if (f.type.startsWith('image/')) {
       const { w, h } = await imageMeta(f);
       const dw = Math.round(Math.min(463, Math.max(173, w / 3)));
       const n = blankNote('image', x, y, { title: f.name.replace(/\.[^.]+$/, ''), metadata: { aspectRatio: +(h / w).toFixed(4), displayWidth: dw, originalFilename: f.name, fileSize: f.size, lightImage: false } });
       n.mediaUrl = await putBlob(`${n.id}-img`, f);
-      st.add(n); made.push(n.id); x += dw + st.prefs.gap;
+      st.add(n); made.push(n.id); x += dw + st.prefs.gap; wrap(dw * (h / w));
     } else if (f.type.startsWith('video/')) {
       continue; // like the original: dropped video files are ignored (no module is created)
     } else if (f.type.startsWith('audio/')) {
@@ -51,12 +55,12 @@ export async function addFiles(files: File[], at: { x: number; y: number }) {
         const id = n.id, upd = (m: object) => { const cur = useStore.getState().notes[id]; if (cur) useStore.getState().update(id, { metadata: { ...cur.metadata, ...m } }); };
         setTimeout(() => { upd({ transcribing: false, cooling: true }); setTimeout(() => upd({ cooling: false }), 6200); }, 3600);
       }
-      st.add(n); made.push(n.id); x += CARD_W + st.prefs.gap;
+      st.add(n); made.push(n.id); x += CARD_W + st.prefs.gap; wrap(166);
     } else if (/\.(md|txt|markdown)$/i.test(f.name) || f.type.startsWith('text/')) {
       const txt = await f.text();
       const [first, ...rest] = txt.split('\n');
       const n = blankNote('text', x, y, { title: first.replace(/^#+\s*/, '').slice(0, 120), text: rest.join('\n').trim().split(/\n{2,}/).map(p => `<p>${esc(p)}</p>`).join(''), metadata: { packed: true } });
-      st.add(n); made.push(n.id); x += CARD_W + st.prefs.gap;
+      st.add(n); made.push(n.id); x += CARD_W + st.prefs.gap; wrap(195);
     }
   }
   if (made.length) useStore.getState().select(made);
@@ -69,7 +73,14 @@ export function addTextOrLink(text: string, at: { x: number; y: number }) {
   if (URL_RE.test(t) && !/\s/.test(t)) {
     const url = /^https?:\/\//.test(t) ? t : `https://${t}`;
     let domain = url; try { domain = new URL(url).hostname; } catch { /* */ }
-    st.add(blankNote('link', at.x - 130, at.y - 97, { title: url, metadata: { url, domain } }), { select: true });
+    const n = blankNote('link', at.x - 130, at.y - 97, { title: url, metadata: { url, domain } });
+    st.add(n, { select: true });
+    // Mac app: the main process fetches Open Graph tags (cached on disk); the web build stays fully offline.
+    desktop?.linkPreview(url).then(og => {
+      const cur = useStore.getState().notes[n.id]; if (!og || !cur) return;
+      const meta = { ...cur.metadata, ...(og.title ? { linkTitle: og.title } : {}), ...(og.image ? { linkImage: og.image } : {}) };
+      useStore.setState(s => ({ notes: { ...s.notes, [n.id]: { ...cur, metadata: meta } } }));
+    }).catch(() => { /* offline: keep the domain card */ });
     return;
   }
   const [first, ...rest] = t.split('\n');
@@ -77,4 +88,34 @@ export function addTextOrLink(text: string, at: { x: number; y: number }) {
   st.add(blankNote('text', at.x - 130, at.y - 33, body
     ? { title: first.slice(0, 140), text: body.split(/\n{2,}/).map(p => `<p>${esc(p)}</p>`).join(''), metadata: { packed: true } }
     : { title: t.slice(0, 400), metadata: { titleAlign: 'center' } }), { select: true });
+}
+
+// Rich-text paste: keep structure (headings, lists, emphasis, links, task lists), drop everything else.
+const KEEP = new Set(['P', 'BR', 'UL', 'OL', 'LI', 'STRONG', 'B', 'EM', 'I', 'U', 'S', 'A', 'H1', 'H2', 'H3', 'BLOCKQUOTE', 'CODE', 'PRE', 'MARK']);
+export function sanitizeHtml(html: string): string {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const walk = (el: Element): string => [...el.childNodes].map(n => {
+    if (n.nodeType === 3) return esc(n.textContent ?? '');
+    if (n.nodeType !== 1) return '';
+    const e = n as Element;
+    if (/^(SCRIPT|STYLE|TEMPLATE|NOSCRIPT|IFRAME|OBJECT|svg|SVG)$/.test(e.tagName)) return ''; const tag = e.tagName === 'B' ? 'STRONG' : e.tagName === 'I' ? 'EM' : e.tagName;
+    const inner = walk(e);
+    if (!KEEP.has(e.tagName)) return /^(DIV|SECTION|ARTICLE|TR|H4|H5|H6)$/.test(e.tagName) ? (inner.trim() ? `<p>${inner}</p>` : '') : inner;
+    if (tag === 'A') { const href = e.getAttribute('href') ?? ''; return /^(https?:|mailto:)/i.test(href) ? `<a href="${esc(href).replace(/"/g, '&quot;')}">${inner}</a>` : inner; }
+    if (tag === 'BR') return '<br>';
+    return `<${tag.toLowerCase()}>${inner}</${tag.toLowerCase()}>`;
+  }).join('');
+  return walk(doc.body).replace(/(<p>\s*<\/p>)+/g, '').trim();
+}
+/** Pasted rich text becomes a packed text module: first heading/line is the title. */
+export function htmlToNote(html: string, at: { x: number; y: number }) {
+  const clean = sanitizeHtml(html); if (!clean) return null;
+  const doc = new DOMParser().parseFromString(clean, 'text/html');
+  const first = doc.body.firstElementChild;
+  let title = '';
+  if (first && /^(H1|H2|H3|P)$/.test(first.tagName) && (first.textContent ?? '').length <= 140) { title = first.textContent ?? ''; first.remove(); }
+  const body = doc.body.innerHTML.trim();
+  if (!body && !title) return null;
+  if (!body) return blankNote('text', at.x - 130, at.y - 33, { title: title.slice(0, 400), metadata: { titleAlign: 'center' } });
+  return blankNote('text', at.x - 130, at.y - 97, { title, text: body, metadata: { packed: true } });
 }

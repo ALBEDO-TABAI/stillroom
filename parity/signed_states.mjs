@@ -20,7 +20,8 @@ export const SIGNED = {
   bin_items_axis: async p => { await SIGNED.bin_items(p); await p.click('[data-bin-view] [data-note-id="a5"]', { button: 'right' }); },
   in_folder: async p => { await p.evaluate(() => { const st = window.__sr.getState(); const n = { ...st.notes.a2, id: '1790000000000001', title: 'New Folder', canvasX: 4000, canvasY: 4000 }; window.__sr.setState({ notes: { ...st.notes, [n.id]: n }, order: [...st.order, n.id] }); }); await p.click('button[data-bc-pill]'); await p.waitForTimeout(300); await p.getByRole('button', { name: 'New Folder' }).click(); await p.waitForTimeout(300); await p.mouse.move(720, 450); },
   new_text: async p => { await p.mouse.click(1250, 120, { button: 'right' }); await p.waitForTimeout(300); await p.click('button[title="Text"]'); await p.waitForTimeout(500); },
-  landing: async p => { await p.evaluate(() => { location.hash = '#/welcome'; }); await p.waitForTimeout(2200); },
+  // the reference is one still frame; hold the slow ambient drift at rest so geometry compares like for like
+  landing: async p => { await p.addStyleTag({ content: '.sr-landing-drift{animation:none!important}' }); await p.evaluate(() => { location.hash = '#/welcome'; }); await p.waitForTimeout(2200); },
   editor: async p => { const c = await card(p, 'a5'); await p.mouse.dblclick(c.x, c.b.y + 30); },
 };
 export const SIGNED_URL = (base, theme) => `${base}user/stillroom.user?fixture=account&theme=${theme}&gap=3&cam=-1108.53,-268.432,1.29264`;

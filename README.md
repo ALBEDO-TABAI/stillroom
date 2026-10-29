@@ -15,3 +15,10 @@ npm test             # vitest
 npm run build
 ```
 Parity harness (needs the dev server): `cd parity && node capture.mjs && SIGNED=1 node capture.mjs && node compare.mjs && node behaviour.mjs` (SIGNED=1 = the signed-in states, compared against redacted refs) → `docs/parity/REPORT.md`, `docs/parity/sbs/*.png`, `docs/parity/behaviour.json`.
+
+More: `?fixture=stress&n=500` (synthetic big canvas), `node parity/audit.mjs` (perf, IME, paste, a11y, window-size, offline probes → `docs/audit/`).
+Keyboard: ⌘⇧E exports the whole space as a .zip (JSON + media), ⌘⇧O imports one. Audit and decisions: `docs/AUDIT.md`; changes: `CHANGELOG.md`.
+
+Mac app (`desktop/`): menu bar with ⌘ shortcuts, remembered window, ⌥⌘Space quick capture, autosave to
+`~/Library/Application Support/Stillroom/autosave/` with rotating backups, link previews fetched and cached in the main process.
+See `docs/MAC_TEST.md`.

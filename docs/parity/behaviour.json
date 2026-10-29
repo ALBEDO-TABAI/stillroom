@@ -37,7 +37,7 @@
  {
   "name": "search: pill widens to 420, results show highlighted match, preview and date; Enter frames it",
   "ok": true,
-  "detail": "{\"ok\":true,\"w1\":260,\"w2\":420,\"hit\":\"Where\",\"meta\":\"Oct 29, 2:25 PM\"}"
+  "detail": "{\"ok\":true,\"w1\":260,\"w2\":420,\"hit\":\"Where\",\"meta\":\"Oct 29, 3:30 PM\"}"
  },
  {
   "name": "handle opens the folder column; picking a folder opens it",
@@ -52,7 +52,7 @@
  {
   "name": "right-click canvas → Text creates and edits a new module",
   "ok": true,
-  "detail": "{\"ok\":true,\"n\":\"1793251554477000\"}"
+  "detail": "{\"ok\":true,\"n\":\"1793255463140000\"}"
  },
  {
   "name": "right-click canvas → Link → paste URL creates a link module",
@@ -92,7 +92,7 @@
  {
   "name": "keyboard: +/− zoom, H reset, F focus, C centre, arrows move selection, ] [ layers",
   "ok": true,
-  "detail": "{\"ok\":true,\"z0\":0.7414814814814815,\"z1\":0.8304592592592593,\"z2\":0.662037037037037,\"sel\":\"1783357657915456\",\"o0\":9,\"o1\":15,\"cz\":3}"
+  "detail": "{\"ok\":true,\"z0\":0.7414814814814815,\"z1\":0.8304592592592593,\"z2\":0.662037037037037,\"sel\":\"901\",\"o0\":0,\"o1\":15,\"cz\":3}"
  },
  {
   "name": "wheel: trackpad-like pans, mouse wheel notches zoom, ctrl+wheel pinches",
@@ -153,5 +153,40 @@
   "name": "signed-out landing: Sign in → local sign-in; Request access is saved locally (no network)",
   "ok": true,
   "detail": "{\"ok\":true,\"saved\":\"[\\\"tester@example.com\\\"]\",\"user\":\"tester\",\"reqs\":[]}"
+ },
+ {
+  "name": "T text: Enter in the title moves into the body; Backspace on empty body returns",
+  "ok": true,
+  "detail": "{\"ok\":true,\"inBody\":true,\"text\":\"<p>Body line</p>\"}"
+ },
+ {
+  "name": "undo/redo cover a title edit",
+  "ok": true,
+  "detail": "{\"ok\":true,\"edited\":\"Welcome to Stillroom. X\",\"undone\":\"Welcome to Stillroom.\"}"
+ },
+ {
+  "name": "deleting a folder hands its modules to the parent canvas; open folder survives reload",
+  "ok": true,
+  "detail": "{\"ok\":true,\"reopened\":\"a2\",\"kids\":1,\"after\":[null]}"
+ },
+ {
+  "name": "drop of 20 images lands as a grid (rows of 5)",
+  "ok": true,
+  "detail": "{\"ok\":true,\"added\":20,\"rows\":4}"
+ },
+ {
+  "name": "Tab reaches the chrome when nothing is selected",
+  "ok": true,
+  "detail": "{\"ok\":true,\"seen\":[\"BUTTON\",\"BUTTON\",\"BUTTON\",\"BUTTON\"]}"
+ },
+ {
+  "name": "export the whole space as .zip and import it back (media included)",
+  "ok": true,
+  "detail": "{\"ok\":true,\"n0\":16,\"n1\":16,\"name\":\"stillroom-space-2026-10-29.zip\"}"
+ },
+ {
+  "name": "landing: scroll story steps through captions with dots, then the letter page",
+  "ok": true,
+  "detail": "{\"ok\":true,\"cur1\":\"Speak it, type it, or drop it in.\",\"letter\":true,\"back\":true}"
  }
 ]

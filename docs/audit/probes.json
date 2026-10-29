@@ -1,0 +1,124 @@
+{
+ "perf_100": {
+  "loadMs": 346,
+  "domCards": 100,
+  "pan": {
+   "fps": 61,
+   "worstFrameMs": 16.8
+  },
+  "zoom": {
+   "fps": 60,
+   "worstFrameMs": 16.8
+  },
+  "layoutMs": 196
+ },
+ "perf_500": {
+  "loadMs": 585,
+  "domCards": 500,
+  "pan": {
+   "fps": 60.5,
+   "worstFrameMs": 16.8
+  },
+  "zoom": {
+   "fps": 60.5,
+   "worstFrameMs": 16.8
+  },
+  "layoutMs": 920
+ },
+ "perf_1000": {
+  "loadMs": 935,
+  "domCards": 1000,
+  "pan": {
+   "fps": 60.5,
+   "worstFrameMs": 16.8
+  },
+  "zoom": {
+   "fps": 60.5,
+   "worstFrameMs": 16.8
+  },
+  "layoutMs": 2885
+ },
+ "cjk_ime": {
+  "titleAfterImeEnter": true,
+  "title": "正文第一行，中文标点“引号你好世界。日本語の文章も",
+  "body": "<p>”与长长长长长长长长长长长长长长长长长长长长长长长长长长的词。</p>",
+  "searchHits": 1
+ },
+ "undo_title_edit": {
+  "before": "Welcome to Stillroom",
+  "edited": "Welcome to Stillroom EDIT",
+  "afterUndo": "Welcome to Stillroom",
+  "afterRedo": "Welcome to Stillroom EDIT",
+  "ok": true
+ },
+ "paste_in_folder": {
+  "copyParent": [
+   "a2"
+  ],
+  "visibleInFolder": 1,
+  "ok": true
+ },
+ "rich_paste": {
+  "title": "Plan",
+  "text": "<ul><li><strong>Clay</strong> model</li><li>Light test</li></ul><p>Done</p>",
+  "keptList": true,
+  "noScript": true
+ },
+ "keyboard_tab_order": {
+  "focused": [
+   "User menu",
+   "@demo",
+   "INPUT",
+   "BUTTON",
+   "Bin",
+   "Record a voice module",
+   "0 modulesDrop here t",
+   "User menu"
+  ],
+  "selectedAfterTabs": []
+ },
+ "aria_unlabelled": {
+  "unlabelled": [],
+  "binFocusStyle": "none 3px none"
+ },
+ "window_800x500": {
+  "overlaps": 0,
+  "offscreen": 0
+ },
+ "window_1024x640": {
+  "overlaps": 0,
+  "offscreen": 0
+ },
+ "window_2560x1440": {
+  "overlaps": 0,
+  "offscreen": 0
+ },
+ "window_390x844": {
+  "overlaps": 0,
+  "offscreen": 0
+ },
+ "long_text": {
+  "cardSize": [
+   259.9990234375,
+   194.999267578125
+  ]
+ },
+ "corrupt_storage": {
+  "notes": [
+   "x1"
+  ],
+  "toast": "Your canvas was damaged — restored the last good copy.",
+  "damagedCopies": 1
+ },
+ "offline_external_requests": {
+  "externalRequests": []
+ },
+ "reduced_motion": {
+  "runningAnimations": 0,
+  "ok": true
+ },
+ "drop_20_images": {
+  "ms": 158,
+  "spanX": 1756
+ }
+}

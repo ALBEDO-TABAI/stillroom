@@ -6,9 +6,14 @@ import { CLUSTER_TOL, CLUSTER_PAD, CLUSTER_R } from '../lib/constants';
 export function clusters(items: { id: string; r: Rect }[], tol = CLUSTER_TOL): string[][] {
   const p = items.map((_, i) => i);
   const find = (i: number): number => (p[i] === i ? i : (p[i] = find(p[i])));
-  for (let i = 0; i < items.length; i++)
-    for (let j = i + 1; j < items.length; j++)
-      if (rectGap(items[i].r, items[j].r) <= tol) p[find(i)] = find(j);
+  // sweep along x: only pairs whose x-ranges come within tol can touch (keeps 1000 modules well under a frame)
+  const byX = items.map((_, i) => i).sort((a, b) => items[a].r.x - items[b].r.x);
+  for (let a = 0; a < byX.length; a++) {
+    const i = byX[a], ri = items[i].r, reach = ri.x + ri.w + tol;
+    for (let b = a + 1; b < byX.length && items[byX[b]].r.x <= reach; b++) {
+      const j = byX[b]; if (rectGap(ri, items[j].r) <= tol) p[find(i)] = find(j);
+    }
+  }
   const g = new Map<number, string[]>();
   items.forEach((it, i) => { const k = find(i); g.set(k, [...(g.get(k) || []), it.id]); });
   return [...g.values()];
@@ -20,8 +25,12 @@ export function silhouettePath(rects: Rect[], pad = CLUSTER_PAD, R = CLUSTER_R):
   const xs = [...new Set(rs.flatMap(r => [r.x0, r.x1]))].sort((a, b) => a - b);
   const ys = [...new Set(rs.flatMap(r => [r.y0, r.y1]))].sort((a, b) => a - b);
   const W = xs.length - 1, H = ys.length - 1;
-  const fill = (i: number, j: number) => i >= 0 && j >= 0 && i < W && j < H &&
-    rs.some(r => r.x0 <= xs[i] && r.x1 >= xs[i + 1] && r.y0 <= ys[j] && r.y1 >= ys[j + 1]);
+  // Occupancy grid over the compressed coordinates, filled once per rect (was a scan of every rect per cell,
+  // which made a 500-module cluster take seconds to outline).
+  const xi = new Map(xs.map((v, i) => [v, i])), yi = new Map(ys.map((v, i) => [v, i]));
+  const grid = new Uint8Array(Math.max(0, W) * Math.max(0, H));
+  for (const r of rs) for (let j = yi.get(r.y0)!, j1 = yi.get(r.y1)!; j < j1; j++) grid.fill(1, j * W + xi.get(r.x0)!, j * W + xi.get(r.x1)!);
+  const fill = (i: number, j: number) => i >= 0 && j >= 0 && i < W && j < H && grid[j * W + i] === 1;
   // directed boundary edges, clockwise (inside on the right in screen coords)
   const edges = new Map<string, [number, number]>();
   const key = (x: number, y: number) => `${x},${y}`;

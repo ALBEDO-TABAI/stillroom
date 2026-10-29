@@ -72,7 +72,7 @@ Mean pixel match: **99.09%** · mean geometry ≤2px: **99.76%**
 | u_hover_link_dark | 98.64 | 100 (10) | 0.03 | [sbs](sbs/u_hover_link_dark.png) |
 | u_hover_link_light | 98.71 | 100 (10) | 0.03 | [sbs](sbs/u_hover_link_light.png) |
 | u_in_folder_dark | 99.97 | 100 (5) | 0.08 | [sbs](sbs/u_in_folder_dark.png) |
-| u_landing_dark | 99.56 | 100 (8) | 0.01 | [sbs](sbs/u_landing_dark.png) |
+| u_landing_dark | 99.56 | 100 (7) | 0.01 | [sbs](sbs/u_landing_dark.png) |
 | u_new_text_dark | 98.61 | 100 (10) | 0.03 | [sbs](sbs/u_new_text_dark.png) |
 | u_record_hover_dark | 98.63 | 100 (10) | 0.03 | [sbs](sbs/u_record_hover_dark.png) |
 | u_record_hover_light | 98.71 | 100 (10) | 0.03 | [sbs](sbs/u_record_hover_light.png) |

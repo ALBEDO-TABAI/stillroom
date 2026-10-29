@@ -13,6 +13,9 @@ export function TextCard({ note, editing, playing, onPlay }: { note: Note; editi
   const scale = m.titleFontScale ?? 1;
   const packed = isPacked(note) || note.type === 'audio';
   const titleRef = useRef<HTMLDivElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const [bodyOpen, setBodyOpen] = React.useState(false);
+  useEffect(() => { if (!editing) setBodyOpen(false); }, [editing]);
   const update = useStore(s => s.update);
 
   useEffect(() => {
@@ -25,7 +28,7 @@ export function TextCard({ note, editing, playing, onPlay }: { note: Note; editi
 
   const commit = () => {
     const t = titleRef.current?.innerText.replace(/\n+$/, '') ?? '';
-    if (t !== note.title) update(note.id, { title: t });
+    if (t !== note.title) { useStore.getState().checkpoint(); update(note.id, { title: t }); } // undoable edit
   };
 
   if (m.transcribing) return <Transcribing />;
@@ -50,11 +53,25 @@ export function TextCard({ note, editing, playing, onPlay }: { note: Note; editi
           onKeyDown={e => {
             if (!editing) return;
             e.stopPropagation();
-            if (e.key === 'Escape' || ((e.metaKey || e.ctrlKey) && e.key === 'Enter')) { e.preventDefault(); (e.target as HTMLElement).blur(); useStore.getState().setUI({ editingId: null }); }
+            if (e.key === 'Escape' || ((e.metaKey || e.ctrlKey) && e.key === 'Enter')) { e.preventDefault(); (e.target as HTMLElement).blur(); useStore.getState().setUI({ editingId: null }); return; }
+            // Enter (outside IME composition) leaves the title and continues in the body, like the original
+            if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing && e.keyCode !== 229 && note.type === 'text' && !packed) {
+              e.preventDefault(); commit(); setBodyOpen(true);
+              requestAnimationFrame(() => { const b = bodyRef.current; if (!b) return; if (!b.innerHTML.trim()) b.innerHTML = '<p><br></p>'; b.focus(); const r = document.createRange(); r.selectNodeContents(b.firstElementChild ?? b); r.collapse(true); const sel = getSelection(); sel?.removeAllRanges(); sel?.addRange(r); });
+            }
           }}
           style={{ textAlign: m.titleAlign ?? (packed || m.titleLevel === 'p' ? 'left' : 'center'), fontWeight: WEIGHT[m.titleWeight ?? 'regular'], ...(packed ? { maxHeight: 137, overflow: 'hidden' } : {}) }}
         >{editing ? note.title : <span>{note.title || (editing ? '' : '\u00a0')}</span>}</div>
-        {note.type !== 'audio' && (packed || hasBody(note.text)) && (
+        {editing && !packed && note.type === 'text' && (bodyOpen || hasBody(note.text)) ? (
+          <div style={{ position: 'relative', zIndex: 1, marginTop: 12 * scale * 0.7 }}>
+            <div ref={bodyRef} data-note-body="true" className="sr-body sr-prose" contentEditable suppressContentEditableWarning style={{ fontSize: 'var(--sr-body-fs)', outline: 'none', userSelect: 'text', cursor: 'text' }}
+              dangerouslySetInnerHTML={{ __html: note.text.startsWith('<') ? note.text : note.text ? `<p>${note.text}</p>` : '' }}
+              onBlur={e => { const h = e.currentTarget.innerHTML.replace(/<p><br><\/p>$/, '').trim(); const v = h === '<br>' ? '' : h; if (v !== note.text) { useStore.getState().checkpoint(); update(note.id, { text: v }); } }}
+              onKeyDown={e => { e.stopPropagation(); if (e.key === 'Escape' || ((e.metaKey || e.ctrlKey) && e.key === 'Enter')) { e.preventDefault(); (e.target as HTMLElement).blur(); useStore.getState().setUI({ editingId: null }); }
+                if (e.key === 'Backspace' && !e.currentTarget.innerText.trim()) { e.preventDefault(); e.currentTarget.innerHTML = ''; (e.currentTarget as HTMLElement).blur(); setBodyOpen(false); const t = titleRef.current; if (t) { t.focus(); const r = document.createRange(); r.selectNodeContents(t); r.collapse(false); getSelection()?.removeAllRanges(); getSelection()?.addRange(r); } } }}
+              onPointerDown={e => e.stopPropagation()} />
+          </div>
+        ) : note.type !== 'audio' && (packed || hasBody(note.text)) && (
           <div style={packed ? { position: 'relative', zIndex: 1, flex: '1 1 auto', minHeight: 0, overflow: 'hidden', marginTop: 0 } : { position: 'relative', zIndex: 1, marginTop: 12 * scale * 0.7 }}>
             <div data-note-body="true" className="sr-body sr-prose" style={packed ? undefined : { fontSize: 'var(--sr-body-fs)' }} dangerouslySetInnerHTML={{ __html: note.text.startsWith('<') ? note.text : `<p>${note.text}</p>` }} />
           </div>

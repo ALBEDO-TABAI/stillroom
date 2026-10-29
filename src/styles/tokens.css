@@ -70,3 +70,7 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display'
 .sr-in--chrome { animation-duration: var(--sr-chrome); animation-timing-function: var(--sr-settle-ease); }
 :root, [data-theme="light"] { --sr-sub: rgba(0,0,0,0.035); --sr-toggle-off: #CFCED3; --sr-knob: #FFFFFF; --sr-knob-border: rgba(0,0,0,0.12); }
 [data-theme="dark"] { --sr-sub: rgba(255,255,255,0.04); --sr-toggle-off: #3A3A3C; --sr-knob: #EDEDED; --sr-knob-border: rgba(255,255,255,0.18); }
+/* Reduced motion: decorative loops stop; state still reads from text/colour. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; animation-delay: 0s !important; }
+}

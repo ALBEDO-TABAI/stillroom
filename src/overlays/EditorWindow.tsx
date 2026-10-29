@@ -49,6 +49,8 @@ function Win({ id, closing }: { id: string; closing: boolean }) {
   }, [id]); // eslint-disable-line
   const close = () => setUI({ editorId: null });
   useEscape(() => (more ? setMore(false) : close()), !closing);
+  const edited = useRef(false);
+  useEffect(() => { edited.current = false; }, [id]);
   const editor = useEditor({
     extensions: [
       StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
@@ -60,6 +62,7 @@ function Win({ id, closing }: { id: string; closing: boolean }) {
     autofocus: 'end',
     editorProps: { attributes: { class: 'sr-editor sr-doc sr-prose', spellcheck: 'true' } },
     onUpdate: ({ editor }) => {
+      if (!edited.current) { edited.current = true; useStore.getState().checkpoint(); } // one undo step per editing session
       const { title, text, align } = split(editor.getHTML());
       update(id, { title, text, metadata: { titleAlign: align ?? note?.metadata.titleAlign } });
     },

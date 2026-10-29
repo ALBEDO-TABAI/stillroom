@@ -67,3 +67,11 @@ Known differences / not done:
   text region from the private capture), `u_landing_dark` (reference module pictures greyed; chevron position taken
   from pixels because the DOM rect was captured mid-animation). Behaviour checks 31/31 (folder navigation, T text,
   landing with zero external requests, video ignored).
+
+## Round 5 — audit and v3 (2026-10-29 JST)
+
+See `docs/AUDIT.md` (findings, priorities, what was declined) and `CHANGELOG.md`. Parity unchanged on unchanged states:
+94 states, mean pixel 99.09 %, geometry 99.76 %. Behaviour 38/38 (7 new: Enter-to-body, undo after title edit, folder
+delete + reopen, 20-file grid, Tab reaches chrome, export/import round trip, landing story). `parity/audit.mjs` re-runs the
+probes; `parity/before_after.mjs` regenerates `docs/img/before-after/` against an older build on :5411.
+Mac build v3: `NAME=stillroom-mac-arm64-v3 ./scripts/build-mac.sh`.

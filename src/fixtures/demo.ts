@@ -50,3 +50,19 @@ export function accountStarterNotes(): Note[] {
     base('a6', 'link', 1582, 808, { title: 'https://www.youtube.com/watch?v=stillroom-fixture', metadata: { url: 'https://www.youtube.com/watch?v=stillroom-fixture', domain: 'youtube.com', linkTitle: 'Stillroom - Breathing Room', linkImage: '/fixtures/pebble-breath-poster.jpg' } }),
   ];
 }
+
+/** Stress fixture (`?fixture=stress&n=500`): a grid of mixed synthetic modules for perf checks. */
+export function stressNotes(n = 500): Note[] {
+  const pics = ['/fixtures/wall-glow.jpg', '/fixtures/pebble-sand.jpg', '/fixtures/hand-capsule.jpg', '/fixtures/neck-glow.jpg', '/fixtures/chest-light.jpg', '/fixtures/seated-light.jpg'];
+  const words = ['quiet', 'stone', 'light', 'room', 'paper', 'sand', 'glow', 'thread', 'window', 'morning', '光', '石', '静かな', '房间'];
+  const out: Note[] = [];
+  const cols = Math.ceil(Math.sqrt(n));
+  for (let i = 0; i < n; i++) {
+    const x = (i % cols) * 290, y = Math.floor(i / cols) * 300;
+    const w = (k: number) => Array.from({ length: k }, (_, j) => words[(i * 7 + j * 3) % words.length]).join(' ');
+    if (i % 5 === 0) out.push(base(`s${i}`, 'image', x, y, { mediaUrl: pics[i % pics.length], metadata: { aspectRatio: 0.75, displayWidth: 260 } }));
+    else if (i % 5 === 1) out.push(base(`s${i}`, 'text', x, y, { title: w(3), text: `<p>${w(18)}</p>`, metadata: { packed: true } }));
+    else out.push(base(`s${i}`, 'text', x, y, { title: w(2 + (i % 4)) }));
+  }
+  return out;
+}

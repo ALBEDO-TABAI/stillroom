@@ -830,10 +830,12 @@
  "u_landing_dark": {
   "pixel": 99.56,
   "geo": {
-   "matched": 8,
+   "matched": 7,
    "within2px": 100,
    "meanMaxDelta": 0.01,
-   "missing": []
+   "missing": [
+    "More"
+   ]
   }
  },
  "u_new_text_dark": {

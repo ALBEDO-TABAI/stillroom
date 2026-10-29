@@ -3,7 +3,7 @@ import { useStore, liveIds, newId } from '../store/store';
 import { keyZoom, resetView, frameRect } from './camera';
 import { rectOf, union } from '../lib/geometry';
 import { galleryLayout, organicLayout, scatter } from '../lib/layouts';
-import { addTextOrLink, addFiles } from '../lib/capture';
+import { addTextOrLink, addFiles, htmlToNote } from '../lib/capture';
 import { toWorld } from './camera';
 import { isTyping } from './Canvas';
 import { escapeStackDepth } from '../lib/motion';
@@ -27,6 +27,14 @@ function neighbour(from: string, dir: 'ArrowLeft' | 'ArrowRight' | 'ArrowUp' | '
   return best;
 }
 
+function newTextAtCentre() {
+  const st = useStore.getState(); if (st.ui.binOpen) st.setUI({ binOpen: false });
+  const c = toWorld(innerWidth / 2, innerHeight / 2);
+  const n = { id: newId(), type: 'text' as const, title: '', text: '', createdAt: Date.now(), updatedAt: Date.now(), canvasX: Math.round(c.x - 130), canvasY: Math.round(c.y - 33), parentId: st.ui.openFolderId, deletedAt: null, metadata: {} };
+  st.add(n, { select: true }); st.setUI({ editingId: n.id });
+}
+addEventListener('sr:new-text', () => { const st = useStore.getState(); if (!st.ui.editorId && !st.ui.slideshowId) newTextAtCentre(); });
+
 export function useShortcuts() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -38,12 +46,10 @@ export function useShortcuts() {
       if (mod && k.toLowerCase() === 'z') { e.preventDefault(); e.shiftKey ? st.redo() : st.undo(); return; }
       if (mod && k.toLowerCase() === 'y') { e.preventDefault(); st.redo(); return; }
       if (mod && k.toLowerCase() === 'a') { e.preventDefault(); st.select(liveIds(st)); return; }
+      if (mod && e.shiftKey && k.toLowerCase() === 'e') { e.preventDefault(); dispatchEvent(new Event('sr:export-space')); return; }
+      if (mod && e.shiftKey && k.toLowerCase() === 'o') { e.preventDefault(); dispatchEvent(new Event('sr:import-space')); return; }
       if (mod && k.toLowerCase() === 'f') { e.preventDefault(); dispatchEvent(new Event('sr:search')); return; }
-      if (mod && k.toLowerCase() === 'n') {
-        e.preventDefault(); const c = toWorld(innerWidth / 2, innerHeight / 2);
-        const n = { id: newId(), type: 'text' as const, title: '', text: '', createdAt: Date.now(), updatedAt: Date.now(), canvasX: Math.round(c.x - 130), canvasY: Math.round(c.y - 33), parentId: null, deletedAt: null, metadata: {} };
-        st.add(n, { select: true }); st.setUI({ editingId: n.id }); return;
-      }
+      if (mod && k.toLowerCase() === 'n') { e.preventDefault(); newTextAtCentre(); return; }
       if (mod && (k.toLowerCase() === 'c' || k.toLowerCase() === 'x')) {
         if (!sel.length) return;
         const items = sel.map(id => st.notes[id]);
@@ -76,6 +82,9 @@ export function useShortcuts() {
         return;
       }
       if (k === 'Tab') {
+        // keyboard users must still reach the chrome: Tab walks modules only while one is selected
+        const inChrome = (document.activeElement as HTMLElement | null)?.closest?.('button,a,input,[tabindex]');
+        if (!sel.length || inChrome) return;
         e.preventDefault(); const ids = liveIds(st); if (!ids.length) return;
         const sorted = ids.slice().sort((a, b) => { const ra = rectOf(st.notes[a], st.sizes), rb = rectOf(st.notes[b], st.sizes); return ra.y - rb.y || ra.x - rb.x; });
         const i = sel.length ? sorted.indexOf(sel[sel.length - 1]) : -1;
@@ -108,11 +117,13 @@ export function useShortcuts() {
         const ids: string[] = [];
         useStore.setState(s => {
           const notes = { ...s.notes }; const order = [...s.order];
-          for (const n of internal) { const id = newId(); notes[id] = { ...n, id, canvasX: n.canvasX + 24, canvasY: n.canvasY + 24, deletedAt: null, createdAt: Date.now(), metadata: { ...n.metadata, dock: null } }; order.push(id); ids.push(id); }
+          for (const n of internal) { const id = newId(); notes[id] = { ...n, id, parentId: s.ui.openFolderId, canvasX: n.canvasX + 24, canvasY: n.canvasY + 24, deletedAt: null, createdAt: Date.now(), metadata: { ...n.metadata, dock: null } }; order.push(id); ids.push(id); } // pasted onto the canvas you're looking at
           return { notes, order };
         });
         st.select(ids); return;
       }
+      const html = e.clipboardData?.getData('text/html') ?? '';
+      if (html && !/^\s*https?:\/\/\S+\s*$/.test(text)) { const n = htmlToNote(html, c); if (n) { st.add(n, { select: true }); return; } }
       addTextOrLink(text, c);
     };
     addEventListener('keydown', onKey); addEventListener('paste', onPaste);

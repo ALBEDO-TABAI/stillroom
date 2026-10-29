@@ -127,8 +127,9 @@ export const useStore = create<State>((set, get) => ({
       for (const id of ids) {
         if (!notes[id]) continue;
         notes[id] = { ...notes[id], deletedAt: now };
-        // children of a deleted folder go with it
-        for (const c of Object.values(notes)) if (c.parentId === id) notes[c.id] = { ...c, deletedAt: now };
+        // a deleted folder hands its modules up to its own canvas (observed on the original: after deleting a
+        // folder its contents were back on the root canvas while the folder sat in the Bin as "0 modules")
+        for (const c of Object.values(notes)) if (c.parentId === id && !ids.includes(c.id)) notes[c.id] = { ...c, parentId: notes[id].parentId ?? null };
         // modules docked to it lose the dock
         for (const c of Object.values(notes)) {
           const d = c.metadata.dock; if (!d) continue;

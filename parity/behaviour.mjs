@@ -155,9 +155,9 @@ await check('record a voice module (fake microphone) and play it back', async (p
   return { ok: !!n && n.duration !== '0:00', duration: n.duration };
 });
 await check('keyboard: +/− zoom, H reset, F focus, C centre, arrows move selection, ] [ layers', async (p, { S, card }) => {
-  const z0 = (await S()).cam.z; await p.keyboard.press('Equal'); await p.waitForTimeout(250); const z1 = (await S()).cam.z;
+  await p.mouse.click(5, 450); const z0 = (await S()).cam.z; await p.keyboard.press('Equal'); await p.waitForTimeout(250); const z1 = (await S()).cam.z;
   await p.keyboard.press('Minus'); await p.keyboard.press('Minus'); await p.waitForTimeout(250); const z2 = (await S()).cam.z;
-  await p.keyboard.press('KeyH'); const h = (await S()).cam;
+  await p.keyboard.press('KeyH'); await p.waitForTimeout(100); const h = (await S()).cam;
   await p.keyboard.press('KeyF'); const f = (await S()).ui.focus; await p.keyboard.press('KeyF');
   const c = await card('912'); await p.mouse.click(c.x, c.y); await p.keyboard.press('ArrowRight'); const sel = (await S()).selected[0];
   const o0 = (await S()).order.indexOf(sel); await p.keyboard.press('Shift+BracketRight'); const o1 = (await S()).order.indexOf(sel);
@@ -265,6 +265,77 @@ await check('signed-out landing: Sign in → local sign-in; Request access is sa
   await p.fill('input[aria-label="Name"]', 'tester', { timeout: 3000 }); await p.click('button:has-text("Open canvas")', { timeout: 3000 }); await p.waitForSelector('[data-card]', { timeout: 5000 });
   const user = await p.evaluate(() => window.__sr.getState().username);
   return { ok: /tester@example.com/.test(saved) && user === 'tester' && reqs.length === 0, saved, user, reqs };
+});
+
+// ---- round 5: audit fixes and new features ----
+await check('T text: Enter in the title moves into the body; Backspace on empty body returns', async (p, { S }) => {
+  await p.mouse.click(1250, 120, { button: 'right' }); await p.click('button[title="Text"]'); await p.waitForTimeout(300);
+  await p.keyboard.type('Heading'); await p.keyboard.press('Enter'); await p.waitForTimeout(150);
+  const inBody = await p.evaluate(() => document.activeElement?.getAttribute('contenteditable') === 'true' && !!document.activeElement.closest('[data-card]'));
+  await p.keyboard.type('Body line'); await p.keyboard.press('Escape'); await p.waitForTimeout(250);
+  const n = Object.values((await S()).notes).find(n => n.title === 'Heading');
+  return { ok: inBody && /Body line/.test(n?.text ?? ''), inBody, text: n?.text };
+});
+await check('undo/redo cover a title edit', async (p) => {
+  const r = await p.evaluate(() => { const st = window.__sr.getState(); const id = st.order.find(i => st.notes[i].type === 'text' && st.notes[i].title); return id; });
+  await p.evaluate(id => window.__sr.getState().setUI({ editingId: id }), r); await p.waitForTimeout(200);
+  await p.keyboard.press('End'); await p.keyboard.type(' X'); await p.keyboard.press('Escape'); await p.waitForTimeout(200);
+  const edited = await p.evaluate(id => window.__sr.getState().notes[id].title, r);
+  await p.keyboard.press('Control+z'); await p.waitForTimeout(150);
+  const undone = await p.evaluate(id => window.__sr.getState().notes[id].title, r);
+  return { ok: edited.endsWith(' X') && !undone.endsWith(' X'), edited, undone };
+});
+await check('deleting a folder hands its modules to the parent canvas; open folder survives reload', async (p, { S }) => {
+  await p.goto(BASE + '?theme=dark'); await p.evaluate(() => localStorage.clear()); await p.reload(); await p.waitForSelector('[data-card]');
+  const f = await p.evaluate(() => { const st = window.__sr.getState(); const f = st.order.find(i => st.notes[i].type === 'folder');
+    const t = st.order.find(i => st.notes[i].type !== 'folder'); if (f && t) st.update(t, { parentId: f }); return f; });
+  if (!f) return { ok: false, why: 'no folder in fixture' };
+  await p.evaluate(f => window.__sr.getState().setUI({ openFolderId: f }), f); await p.waitForTimeout(500);
+  await p.goto(BASE + '?theme=dark'); await p.waitForTimeout(1200); // no fixture: load what was saved
+  const reopened = (await S()).ui.openFolderId;
+  const kids = await p.evaluate(f => Object.values(window.__sr.getState().notes).filter(n => n.parentId === f).map(n => n.id), f);
+  await p.evaluate(f => { const st = window.__sr.getState(); st.setUI({ openFolderId: null }); st.remove([f]); }, f);
+  const after = await p.evaluate(ids => ids.map(i => window.__sr.getState().notes[i].parentId), kids);
+  return { ok: reopened === f && kids.length > 0 && after.every(x => x === null), reopened, kids: kids.length, after };
+});
+await check('drop of 20 images lands as a grid (rows of 5)', async (p, { S }) => {
+  const before = (await S()).order.length;
+  await p.evaluate(async () => {
+    const c = document.createElement('canvas'); c.width = 400; c.height = 300; c.getContext('2d').fillRect(0, 0, 400, 300);
+    const blob = await new Promise(r => c.toBlob(r, 'image/png')); const dt = new DataTransfer();
+    for (let i = 0; i < 20; i++) dt.items.add(new File([blob], `p${i}.png`, { type: 'image/png' }));
+    const t = document.elementFromPoint(700, 450); for (const ty of ['dragenter', 'dragover', 'drop']) t.dispatchEvent(new DragEvent(ty, { bubbles: true, cancelable: true, clientX: 700, clientY: 450, dataTransfer: dt }));
+  });
+  await p.waitForTimeout(2500);
+  const s = await S(); const added = s.order.slice(before).map(i => s.notes[i]);
+  const ys = new Set(added.map(n => n.canvasY)); const xs = added.map(n => n.canvasX);
+  return { ok: added.length === 20 && ys.size === 4 && Math.max(...xs) - Math.min(...xs) < 2000, added: added.length, rows: ys.size };
+});
+await check('Tab reaches the chrome when nothing is selected', async (p) => {
+  await p.evaluate(() => window.__sr.getState().select([])); await p.mouse.click(5, 450);
+  const seen = []; for (let i = 0; i < 4; i++) { await p.keyboard.press('Tab'); seen.push(await p.evaluate(() => document.activeElement?.tagName)); }
+  return { ok: seen.some(t => t === 'BUTTON' || t === 'INPUT'), seen };
+});
+await check('export the whole space as .zip and import it back (media included)', async (p) => {
+  const n0 = await p.evaluate(() => window.__sr.getState().order.length);
+  const [dl] = await Promise.all([p.waitForEvent('download'), p.keyboard.press('Control+Shift+E')]);
+  const file = '/tmp/sr-space.zip'; await dl.saveAs(file);
+  await p.evaluate(() => { const st = window.__sr.getState(); st.replaceAll([]); });
+  p.once('dialog', d => d.accept());
+  const [chooser] = await Promise.all([p.waitForEvent('filechooser'), p.keyboard.press('Control+Shift+O')]);
+  await chooser.setFiles(file); await p.waitForTimeout(1200);
+  const n1 = await p.evaluate(() => window.__sr.getState().order.length);
+  return { ok: n0 > 0 && n1 === n0, n0, n1, name: dl.suggestedFilename() };
+});
+await check('landing: scroll story steps through captions with dots, then the letter page', async (p) => {
+  await p.goto(BASE + '#/welcome'); await p.waitForSelector('[data-landing]');
+  await p.click('button[aria-label="Next"]'); await p.waitForTimeout(700);
+  const cur1 = await p.getAttribute('.sr-dot[aria-current="true"]', 'aria-label');
+  for (let i = 0; i < 5; i++) { await p.keyboard.press('ArrowDown'); await p.waitForTimeout(900); }
+  const letter = await p.isVisible('a:has-text("Try it")');
+  await p.keyboard.press('Home'); await p.waitForTimeout(600);
+  const back = await p.isVisible('button[aria-label="Next"]');
+  return { ok: !!cur1 && letter && back, cur1, letter, back };
 });
 fs.mkdirSync(new URL('../docs/parity/', import.meta.url).pathname, { recursive: true });
 fs.writeFileSync(new URL('../docs/parity/behaviour.json', import.meta.url).pathname, JSON.stringify(results, null, 1));

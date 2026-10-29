@@ -163,3 +163,16 @@
 .sr-landing-email::placeholder { color: var(--sr-muted); }
 .sr-landing-foot { position: fixed; left: 0; right: 0; bottom: 14px; z-index: 80; display: flex; justify-content: center; gap: 8px; white-space: nowrap; font-size: 12px; font-weight: 500; letter-spacing: .01em; color: rgb(142,142,147); }
 .sr-landing-foot a { color: inherit; text-decoration: none; }
+.sr-landing-field, .sr-landing-hero, .sr-landing-letter { transition: opacity .5s cubic-bezier(.22,1,.36,1), visibility .5s; }
+.sr-landing-move { transition: transform .9s cubic-bezier(.22,1,.36,1), opacity .6s; will-change: transform; }
+.sr-landing-drift { animation: srDrift 12s ease-in-out infinite alternate; }
+@keyframes srDrift { 0% { transform: translate(0, 0); } 50% { transform: translate(4px, -6px); } 100% { transform: translate(-5px, 3px); } }
+.sr-dots { position: relative; display: flex; justify-content: center; align-items: center; gap: 6px; }
+.sr-dot { height: 6px; border: none; padding: 0; border-radius: 3px; cursor: pointer; transition: opacity .25s, width 260ms cubic-bezier(.22,1,.36,1), background-color 260ms; }
+.sr-dot:focus-visible { outline: 2px solid var(--sr-accent, #FFA000); outline-offset: 3px; }
+.sr-landing-letter { position: absolute; inset: 0; }
+.sr-landing-letter-text { position: absolute; left: 0; right: 0; top: 86px; margin: 0 auto; padding: 0 24px; max-width: 19.56em; font-size: 24px; line-height: 1.5; color: rgb(240,240,240); }
+.sr-landing-letter-text p { margin: 0 0 1.333em; }
+.sr-landing-try { position: absolute; left: 50%; top: 680px; transform: translateX(-50%); text-decoration: none; }
+.sr-landing-back { left: 50%; right: auto; transform: translateX(-50%); border: none; cursor: pointer; font-family: inherit; }
+@media (prefers-reduced-motion: reduce) { .sr-landing-drift { animation: none; } .sr-landing-move { transition: opacity .2s; } }

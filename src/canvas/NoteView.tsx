@@ -14,7 +14,7 @@ function InlineBar({ id }: { id: string }) {
   const update = useStore(s => s.update);
   const setUI = useStore(s => s.setUI);
   const m = note.metadata;
-  const set = (meta: Partial<typeof m>) => update(id, { metadata: { ...m, ...meta } });
+  const set = (meta: Partial<typeof m>) => { useStore.getState().checkpoint(); update(id, { metadata: { ...m, ...meta } }); };
   const hasList = /<ul|<ol/.test(note.text);
   const align = m.titleAlign ?? (isPacked(note) || m.titleLevel === 'p' ? 'left' : 'center');
   const nextAlign = ({ left: 'center', center: 'right', right: 'left' } as const)[align];
@@ -31,7 +31,7 @@ function InlineBar({ id }: { id: string }) {
           <B title="Text level" onClick={() => set(m.titleLevel === 'p' ? { titleLevel: undefined } : (m.titleFontScale ?? 1) >= 1.9 ? { titleFontScale: 1, titleLevel: 'p' } : { titleFontScale: 2 })}>{m.titleLevel === 'p'
             ? <span style={{ fontSize: 17, fontWeight: 500 }}>T</span>
             : <span style={{ fontSize: 15, fontWeight: 600, letterSpacing: '-0.02em' }}>H<span style={{ fontSize: 11 }}>1</span></span>}</B>
-          <B title="Block" on={false} onClick={() => update(id, { text: hasList ? note.text.replace(/<\/?ul>|<\/?li>/g, '') : '<ul><li>' + (note.text || '<p></p>') + '</li></ul>' })}><Icon name="list" size={20} /></B>
+          <B title="Block" on={false} onClick={() => { useStore.getState().checkpoint(); update(id, { text: hasList ? note.text.replace(/<\/?ul>|<\/?li>/g, '') : '<ul><li>' + (note.text || '<p></p>') + '</li></ul>' }); }}><Icon name="list" size={20} /></B>
           <B title={wNow[0].toUpperCase() + wNow.slice(1)} onClick={() => set({ titleWeight: weights[(weights.indexOf(wNow as any) + 1) % 3] })}><span style={{ fontWeight: wNow === 'light' ? 300 : wNow === 'medium' ? 500 : 400, fontSize: 16 }}>A</span></B>
           <B title={'Align ' + align} onClick={() => set({ titleAlign: nextAlign })}><Icon name={align === 'center' ? 'alignCenter' : align === 'right' ? 'alignRight' : 'align'} size={20} /></B>
           <B title="More" onClick={() => setUI({ editingId: null, editorId: id })}><Icon name="more" size={20} /></B>
