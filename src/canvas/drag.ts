@@ -2,7 +2,7 @@ import { useStore, liveIds } from '../store/store';
 import type { Rect } from '../lib/geometry';
 import { rectOf } from '../lib/geometry';
 
-export type Guide = { x1: number; y1: number; x2: number; y2: number };
+export type Guide = { x1: number; y1: number; x2: number; y2: number; kind?: 'dock' };
 export const useGuides = { lines: [] as Guide[], listeners: new Set<() => void>() };
 export function setGuides(g: Guide[]) { useGuides.lines = g; useGuides.listeners.forEach(f => f()); }
 

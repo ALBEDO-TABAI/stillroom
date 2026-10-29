@@ -1,3 +1,5 @@
+import { animateSelection } from '../canvas/selection';
+import type { Note } from '../store/types';
 import { useStore } from '../store/store';
 import { rectOf, union } from './geometry';
 import { computeDocks } from '../canvas/drag';
@@ -21,7 +23,7 @@ export function galleryLayout(ids: string[]) {
     patches[it.id] = { canvasX: Math.round(x), canvasY: Math.round(y), ...(scaled ? { metadata: { displayWidth: w } } : {}) };
     x += w + gap; row.push(it);
   }
-  st.updateMany(patches); requestAnimationFrame(() => computeDocks(ids));
+  applyLayout(ids, patches); requestAnimationFrame(() => computeDocks(ids));
 }
 
 /** L — organic: a masonry of columns, shortest column first. */
@@ -40,7 +42,7 @@ export function organicLayout(ids: string[]) {
     patches[it.id] = { canvasX: Math.round(box.x + c * (colW + gap) + (colW - it.r.w) / 2), canvasY: Math.round(hs[c]) };
     hs[c] += it.r.h + gap;
   }
-  st.updateMany(patches); requestAnimationFrame(() => computeDocks(ids));
+  applyLayout(ids, patches); requestAnimationFrame(() => computeDocks(ids));
 }
 
 /** R — scatter: loosen the selection into open space around its centre. */
@@ -55,5 +57,14 @@ export function scatter(ids: string[]) {
     const a = i * 2.399963 + Math.random() * 0.6, d = R * Math.sqrt((i + 0.5) / rs.length) * (0.8 + Math.random() * 0.5);
     patches[it.id] = { canvasX: Math.round(cx + Math.cos(a) * d - it.r.w / 2), canvasY: Math.round(cy + Math.sin(a) * d - it.r.h / 2), metadata: { dock: null } };
   });
-  st.updateMany(patches);
+  applyLayout(ids, patches);
+}
+
+function applyLayout(ids: string[], patches: Record<string, Partial<Note>>) {
+  const st = useStore.getState();
+  for (const id of ids) {
+    const n = st.notes[id], m = n.metadata;
+    patches[id].metadata = { ...patches[id].metadata, layoutBefore: m.layoutBefore ?? { x: n.canvasX, y: n.canvasY, width: m.displayWidth, fontScale: m.titleFontScale, frameH: m.frameH } };
+  }
+  animateSelection(ids, () => st.updateMany(patches));
 }

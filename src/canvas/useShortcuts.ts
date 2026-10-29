@@ -1,3 +1,4 @@
+import { openFolder } from './folders';
 import { useEffect } from 'react';
 import { useStore, liveIds, newId } from '../store/store';
 import { keyZoom, resetView, frameRect } from './camera';
@@ -58,6 +59,7 @@ export function useShortcuts() {
         if (k.toLowerCase() === 'x') st.remove(sel);
         e.preventDefault(); return;
       }
+      if (e.altKey && k === 'ArrowUp' && ui.openFolderId) { e.preventDefault(); openFolder(st.notes[ui.openFolderId]?.parentId ?? null); return; }
       if (mod) return;
       if (k === 'Escape') {
         if (escapeStackDepth()) return;
@@ -70,7 +72,8 @@ export function useShortcuts() {
       if (k === 'Enter') {
         const one = sel.length === 1 ? st.notes[sel[0]] : null;
         if (!one) return; e.preventDefault();
-        if (one.type === 'image' || one.type === 'video') st.setUI({ slideshowId: one.id });
+        if (one.type === 'folder') openFolder(one.id);
+        else if (one.type === 'image' || one.type === 'video') st.setUI({ slideshowId: one.id });
         else if (one.type === 'text' || one.type === 'audio') st.setUI({ editorId: one.id });
         return;
       }

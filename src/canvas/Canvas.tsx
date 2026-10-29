@@ -4,14 +4,18 @@ import { onWheel, toWorld, zoomAt, frameRect } from './camera';
 import { NoteView, type CardHandlers } from './NoteView';
 import { clusters, silhouettePath } from './clusters';
 import { snap, computeDocks, setGuides, useGuides } from './drag';
-import { rectOf, intersects, noteWidth, isPacked, type Rect } from '../lib/geometry';
+import { rectOf, intersects, noteWidth, isPacked, union, type Rect } from '../lib/geometry';
+import { adaptiveSnap, scaleSelection, animateSelection } from './selection';
+import { Arcs } from '../cards/Arcs';
+import type { Note } from '../store/types';
+import { openFolder } from './folders';
 import type { Corner } from '../cards/Arcs';
 
 type Drag =
-  | { kind: 'move'; id: string; sx: number; sy: number; start: Record<string, { x: number; y: number }>; moved: boolean; shake: { t: number; dx: number; dy: number; flipsX: number; flipsY: number; lx: number; ly: number }; dupe?: boolean }
+  | { kind: 'move'; id: string; sx: number; sy: number; start: Record<string, Rect>; startNotes: Record<string, Note>; adaptive?: ReturnType<typeof adaptiveSnap>; dropTarget?: string | null; moved: boolean; shake: { t: number; dx: number; dy: number; flipsX: number; flipsY: number; lx: number; ly: number }; dupe?: boolean }
   | { kind: 'pan'; sx: number; sy: number; cx: number; cy: number }
   | { kind: 'marquee'; sx: number; sy: number; x: number; y: number; additive: string[] }
-  | { kind: 'resize'; id: string; corner: Corner | 'l' | 'r' | 't' | 'b'; sx: number; sy: number; w: number; scale: number; x: number; y: number; h: number; rotate: boolean }
+  | { kind: 'resize'; id: string; corner: Corner | 'l' | 'r' | 't' | 'b'; sx: number; sy: number; w: number; scale: number; x: number; y: number; h: number; rotate: boolean; group?: { rects: Record<string, Rect>; notes: Record<string, Note> } }
   | { kind: 'crop'; id: string; sx: number; sy: number; cx: number; cy: number }
   | null;
 
@@ -32,8 +36,16 @@ export function Canvas() {
   const space = useRef(false);
   const guides = useSyncExternalStore(f => { useGuides.listeners.add(f); return () => useGuides.listeners.delete(f); }, () => useGuides.lines);
 
+  const selected = useStore(s => s.selected);
   const folder = useStore(s => s.ui.openFolderId);
+  const folderExists = !folder || !!notes[folder] && !notes[folder].deletedAt;
+  useEffect(() => {
+    if (!folderExists) openFolder(folder ? notes[folder]?.parentId ?? null : null);
+  }, [folder, folderExists]);
   const ids = useMemo(() => liveIds({ notes, order }, folder), [notes, order, folder]);
+  const selectedIds = selected.filter(id => ids.includes(id));
+  const selectionRects = selectedIds.map(id => rectOf(notes[id], sizes));
+  const selectionBox = selectedIds.length > 1 ? union(selectionRects) : null;
   const groups = useMemo(() => {
     const items = ids.map(id => ({ id, r: rectOf(notes[id], sizes) }));
     return clusters(items).filter(g => g.length > 1).map(g => ({ ids: g, d: silhouettePath(g.map(id => rectOf(notes[id], sizes))) }));
@@ -106,9 +118,9 @@ export function Canvas() {
       let sel = st.selected;
       if (e.shiftKey || e.metaKey) { sel = sel.includes(id) ? sel.filter(s => s !== id) : [...sel, id]; st.select(sel); if (!sel.includes(id)) return; }
       else if (!sel.includes(id)) { sel = [id]; st.select(sel); }
-      const start: Record<string, { x: number; y: number }> = {};
-      for (const s of sel) { const m = st.notes[s]; if (m) start[s] = { x: m.canvasX, y: m.canvasY }; }
-      drag.current = { kind: 'move', id, sx: e.clientX, sy: e.clientY, start, moved: false, shake: { t: performance.now(), dx: 0, dy: 0, flipsX: 0, flipsY: 0, lx: e.clientX, ly: e.clientY } };
+      const start: Record<string, Rect> = {};
+      for (const s of sel) { const m = st.notes[s]; if (m) start[s] = rectOf(m, st.sizes); }
+      drag.current = { kind: 'move', id, sx: e.clientX, sy: e.clientY, start, startNotes: st.notes, moved: false, shake: { t: performance.now(), dx: 0, dy: 0, flipsX: 0, flipsY: 0, lx: e.clientX, ly: e.clientY } };
       vp.current!.setPointerCapture(e.pointerId);
     },
     onArc: (e, id, corner) => {
@@ -131,12 +143,7 @@ export function Canvas() {
       e.stopPropagation();
       const st = useStore.getState(); const n = st.notes[id];
       if (n.type === 'image') st.setUI({ slideshowId: id });
-      else if (n.type === 'folder') {
-        // zoom so the folder stands at ~48% of the viewport's short side, centred (measured on the reference)
-        const r = rectOf(n, st.sizes);
-        const z = Math.min(0.47682 * Math.min(innerWidth, innerHeight) / Math.max(r.w, r.h), 3);
-        st.setCam({ x: innerWidth / 2 - (r.x + r.w / 2) * z, y: innerHeight / 2 - (r.y + r.h / 2) * z, z }, 520);
-      }
+      else if (n.type === 'folder') openFolder(id);
       else if (n.type === 'link') window.open(n.metadata.url ?? n.title, '_blank', 'noopener');
       else if (n.type === 'video') st.setUI({ slideshowId: id });
       else if (n.type === 'text' && !isPacked(n)) st.setUI({ editingId: id });
@@ -145,7 +152,12 @@ export function Canvas() {
     onContext: (e, id) => {
       e.preventDefault(); e.stopPropagation();
       const st = useStore.getState();
-      st.select([id]); st.setUI({ menu: { kind: 'axis', id }, axisDownload: false, infoId: null, userMenu: false });
+      const selection = st.selected.includes(id) ? st.selected : [id];
+      if (!st.selected.includes(id)) st.select(selection);
+      const r = union(selection.map(i => rectOf(st.notes[i], st.sizes))), c = st.cam;
+      if (r.x * c.z + c.x < 140 || r.y * c.z + c.y < 140 || (r.x + r.w) * c.z + c.x > innerWidth - 140 || (r.y + r.h) * c.z + c.y > innerHeight - 100)
+        frameRect(r, { pad: 170, maxZ: c.z, anim: 220 });
+      st.setUI({ menu: { kind: 'axis', id }, axisDownload: false, infoId: null, userMenu: false });
     },
   }), []);
 
@@ -189,6 +201,14 @@ export function Canvas() {
       const n = st.notes[d.id]; const dx = (e.clientX - d.sx) / z, dy = (e.clientY - d.sy) / z;
       if (d.rotate) return; // rotation resolves on release
       const c = d.corner;
+      if (d.group) {
+        const right = c === 'ne' || c === 'se', bottom = c === 'sw' || c === 'se';
+        const minK = Math.max(...Object.entries(d.group.rects).map(([id, r]) => (d.group!.notes[id].type === 'folder' ? 160 : 80) / r.w));
+        const k = Math.max(minK, Math.max((d.w + (right ? dx : -dx)) / d.w, (d.h + (bottom ? dy : -dy)) / d.h));
+        const origin = { x: right ? d.x : d.x + d.w, y: bottom ? d.y : d.y + d.h };
+        st.updateMany(scaleSelection(d.group.notes, d.group.rects, origin, origin, k));
+        return;
+      }
       if (c === 'l' || c === 'r') {
         const nw = Math.max(80, d.w + (c === 'r' ? dx : -dx));
         st.update(d.id, { canvasX: c === 'l' ? Math.round(d.x + d.w - nw) : d.x, metadata: { displayWidth: Math.round(nw) } });
@@ -201,7 +221,7 @@ export function Canvas() {
       }
       const sxn = c === 'ne' || c === 'se' ? 1 : -1, syn = c === 'sw' || c === 'se' ? 1 : -1;
       const k = Math.max(0.25, Math.max((d.w + sxn * dx) / d.w, (d.h + syn * dy) / d.h));
-      const nw = Math.max(80, Math.round(d.w * k));
+      const nw = Math.max(n.type === 'folder' ? 160 : 80, Math.round(d.w * k));
       const patch: any = { metadata: { displayWidth: nw } };
       if (n.type === 'text') patch.metadata.titleFontScale = +(d.scale * k).toFixed(4);
       if (n.type === 'text' && n.metadata.frameH) patch.metadata.frameH = undefined;
@@ -216,13 +236,13 @@ export function Canvas() {
         if (Math.hypot(dxs, dys) < 3) return;
         d.moved = true; st.checkpoint(); setDraggingId(d.id);
         if (e.altKey) { // ⌥-drag duplicates
-          const map: Record<string, { x: number; y: number }> = {};
+          const map: Record<string, Rect> = {};
           for (const [id, p] of Object.entries(d.start)) {
             const src = st.notes[id]; const nid = `${id}-c${Date.now() % 100000}`;
             useStore.setState(s => ({ notes: { ...s.notes, [nid]: { ...src, id: nid, createdAt: Date.now() } }, order: [...s.order, nid] }));
             map[nid] = p;
           }
-          d.start = map; d.id = Object.keys(map)[Object.keys(d.start).indexOf(d.id)] ?? Object.keys(map)[0]; st.select(Object.keys(map));
+          d.startNotes = useStore.getState().notes; d.start = map; d.id = Object.keys(map)[Object.keys(d.start).indexOf(d.id)] ?? Object.keys(map)[0]; st.select(Object.keys(map));
         }
       }
       // shake: vertical shake → front, horizontal shake → back
@@ -235,31 +255,46 @@ export function Canvas() {
       if (sh.flipsX >= 4) { st.reorder(Object.keys(d.start), 'back'); sh.flipsX = 0; sh.t = now; }
 
       let dx = dxs / z, dy = dys / z;
-      const lead = st.notes[d.id];
-      if (lead && !e.shiftKey && st.prefs.magneticSnap) {
-        const sz = st.sizes[d.id] ?? { w: noteWidth(lead), h: 100 };
-        const r = { x: d.start[d.id].x + dx, y: d.start[d.id].y + dy, w: sz.w, h: sz.h };
-        const others = liveIds(st).filter(i => !(i in d.start)).map(i => rectOf(st.notes[i], st.sizes));
-        const s = snap(r, others, st.prefs.gap, st.prefs.snapRadius / Math.max(z, 0.35), st.prefs.smartGuides);
-        dx = s.x - d.start[d.id].x; dy = s.y - d.start[d.id].y;
-        setGuides(s.guides);
-      } else setGuides([]);
-      const patches: Record<string, any> = {};
-      for (const [id, p] of Object.entries(d.start)) patches[id] = { canvasX: Math.round(p.x + dx), canvasY: Math.round(p.y + dy) };
-      st.updateMany(patches);
-      // folder under the pointer?
+      const previous = d.adaptive ?? null;
+      d.adaptive = null;
       const under = document.elementsFromPoint(e.clientX, e.clientY).map(el => (el as HTMLElement).closest?.('[data-kind="folder"]') as HTMLElement | null).find(Boolean);
       const fid = under?.dataset.noteId;
-      setDropFolder(fid && !(fid in d.start) ? fid : null);
+      d.dropTarget = fid && !(fid in d.start) ? fid : null;
+      setDropFolder(d.dropTarget);
+      const origin = union(Object.values(d.start));
+      const members = Object.entries(d.start).map(([id, r]) => ({ id, r: { ...r, x: r.x + dx, y: r.y + dy } }));
+      const bounds = { ...origin, x: origin.x + dx, y: origin.y + dy };
+      if (!e.shiftKey && st.prefs.magneticSnap && !d.dropTarget) {
+        const neighbours = liveIds(st).filter(i => !(i in d.start));
+        const others = neighbours.map(id => ({ id, r: rectOf(st.notes[id], st.sizes) }));
+        const radius = st.prefs.snapRadius / z;
+        if (st.prefs.adaptiveScale)
+          d.adaptive = adaptiveSnap(members, others.filter(o => st.notes[o.id].type !== 'folder'), st.prefs.gap, radius, previous);
+        if (d.adaptive) {
+          dx = d.adaptive.dragX - origin.x; dy = d.adaptive.dragY - origin.y;
+          setGuides([d.adaptive.guide]);
+        } else {
+          const result = snap(bounds, others.map(o => o.r), st.prefs.gap, radius, st.prefs.smartGuides);
+          dx = result.x - origin.x; dy = result.y - origin.y;
+          setGuides(result.guides);
+        }
+      } else setGuides([]);
+      const patches: Record<string, any> = {};
+      for (const [id, p] of Object.entries(d.start)) patches[id] = { canvasX: p.x + dx, canvasY: p.y + dy };
+      st.updateMany(patches);
     }
   };
 
   const onUp = (e: React.PointerEvent) => {
     touches.current.delete(e.pointerId); if (touches.current.size < 2) pinch.current = null;
+    if (e.type === 'pointerup' && drag.current?.kind === 'move' && drag.current.moved) onMove(e);
     const d = drag.current; drag.current = null;
     document.body.classList.remove('sr-space-active');
     const st = useStore.getState();
     if (!d) return;
+    if (e.type === 'pointercancel' && (d.kind === 'resize' || d.kind === 'move' && d.moved)) {
+      st.undo(); useStore.setState({ future: [] }); setDraggingId(null); setDropFolder(null); setGuides([]); return;
+    }
     if (d.kind === 'marquee') {
       if (!marquee && Math.hypot(e.clientX - d.sx, e.clientY - d.sy) < 3 && !e.shiftKey) {
         st.select([]);
@@ -277,15 +312,22 @@ export function Canvas() {
         if (!e.shiftKey && !e.metaKey) st.select([d.id]);
         return;
       }
-      if (dropFolder) {
-        const ids = Object.keys(d.start).filter(i => st.notes[i].type !== 'folder');
+      if (d.dropTarget) {
+        const ids = Object.keys(d.start);
         const patches: Record<string, any> = {};
-        ids.forEach((i, k) => { patches[i] = { parentId: dropFolder, canvasX: d.start[i].x, canvasY: d.start[i].y, metadata: { dock: null } }; });
+        ids.forEach((i, k) => { patches[i] = { parentId: d.dropTarget, canvasX: d.start[i].x, canvasY: d.start[i].y, metadata: { dock: null } }; });
         st.updateMany(patches); st.select([]); setDropFolder(null);
+        // New arrivals may be outside the folder's previous view; frame its contents on next entry.
+        const folderCams = { ...st.folderCams }; delete folderCams[d.dropTarget];
+        useStore.setState({ folderCams });
         st.setUI({ toast: `Moved ${ids.length} module${ids.length === 1 ? '' : 's'} into the folder` });
         return;
       }
-      computeDocks(Object.keys(d.start));
+      if (d.adaptive && !e.shiftKey) {
+        const target = d.adaptive;
+        animateSelection(Object.keys(d.start), () => st.updateMany(scaleSelection(d.startNotes, d.start, union(Object.values(d.start)), target, target.k)));
+      }
+      requestAnimationFrame(() => computeDocks(Object.keys(d.start)));
     }
   };
 
@@ -311,13 +353,29 @@ export function Canvas() {
         const id = el?.dataset.noteId; if (id && useStore.getState().ui.editingId !== id) h.onDouble(e, id);
       }}
       onContextMenu={onContext}>
+      {folder && ids.length === 0 && <div style={{ position: 'absolute', top: '45%', width: '100%', textAlign: 'center', color: 'var(--sr-muted)', pointerEvents: 'none' }}>
+        <p>This folder is empty</p><p>Drop files here, or right-click to add a module.</p>
+      </div>}
       <div className="sr-world" data-dim={axisOn ? 'true' : undefined}
         style={{ transform: `translate(${cam.x}px, ${cam.y}px) scale(${cam.z})`, transition }}>
         <svg className="sr-clusters">
-          {groups.map((g, i) => <path key={g.ids.join()} d={g.d} className={i === hoverCluster || (draggingId && g.ids.includes(draggingId)) ? 'on' : ''} />)}
+          {groups.map((g, i) => selectionBox && g.ids.some(id => selectedIds.includes(id)) ? null : <path key={g.ids.join()} d={g.d} className={i === hoverCluster || (draggingId && g.ids.includes(draggingId)) ? 'on' : ''} />)}
         </svg>
-        {ids.map(id => <NoteView key={id} id={id} z={cam.z} h={h} dropTarget={dropFolder === id} dragging={draggingId === id} />)}
-        <svg className="sr-guides">{guides.map((g, i) => <line key={i} x1={g.x1} y1={g.y1} x2={g.x2} y2={g.y2} strokeWidth={1 / cam.z} />)}</svg>
+        {ids.map(id => <NoteView key={id} id={id} z={cam.z} h={h} dropTarget={dropFolder === id} dragging={!!draggingId && selectedIds.includes(id)} grouped={selectedIds.length > 1 && selectedIds.includes(id)} />)}
+        {selectionBox && <>
+          <svg className="sr-clusters sr-selection-hull"><path className="on" d={silhouettePath(selectionRects)} /></svg>
+          <div className="sr-group-handles" data-group-selection="true" onPointerDown={e => h.onDown(e, selectedIds[0])} onContextMenu={e => h.onContext(e, selectedIds[0])} style={{ left: selectionBox.x - 12, top: selectionBox.y - 12, width: selectionBox.w + 24, height: selectionBox.h + 24 }}>
+            <Arcs onDown={(e, corner) => {
+              if (e.button !== 0) return;
+              e.stopPropagation(); const st = useStore.getState(); st.checkpoint();
+              st.setUI({ menu: null });
+              drag.current = { kind: 'resize', id: selectedIds[0], corner, sx: e.clientX, sy: e.clientY, ...{ x: selectionBox.x, y: selectionBox.y, w: selectionBox.w, h: selectionBox.h }, scale: 1, rotate: false,
+                group: { rects: Object.fromEntries(selectedIds.map(id => [id, rectOf(st.notes[id], st.sizes)])), notes: st.notes } };
+              vp.current!.setPointerCapture(e.pointerId);
+            }} />
+          </div>
+        </>}
+        <svg className="sr-guides">{guides.map((g, i) => <line key={i} x1={g.x1} y1={g.y1} x2={g.x2} y2={g.y2} data-kind={g.kind} strokeWidth={(g.kind === 'dock' ? 2 : 1) / cam.z} />)}</svg>
       </div>
       {marquee && <div className="sr-marquee" style={{ left: marquee.x, top: marquee.y, width: marquee.w, height: marquee.h }} />}
     </div>

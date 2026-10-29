@@ -35,6 +35,7 @@ export interface State {
   order: string[];             // paint order, back → front
   sizes: Record<string, { w: number; h: number }>;
   cam: Cam;
+  folderCams: Record<string, Cam>;
   camAnim: number;             // ms for the next camera transition (0 = instant)
   selected: string[];
   hoverId: string | null;
@@ -77,7 +78,7 @@ const initialUI: UIState = {
 };
 
 export const useStore = create<State>((set, get) => ({
-  notes: {}, order: [], sizes: {}, cam: { x: 0, y: 0, z: 1 }, camAnim: 0, selected: [], hoverId: null,
+  notes: {}, order: [], sizes: {}, cam: { x: 0, y: 0, z: 1 }, camAnim: 0, folderCams: {}, selected: [], hoverId: null,
   prefs: { ...DEFAULT_PREFS }, ui: { ...initialUI }, username: 'demo', past: [], future: [], clipboard: [],
 
   setCam: (c, anim = 0) => set({ cam: c, camAnim: anim }),
@@ -92,12 +93,12 @@ export const useStore = create<State>((set, get) => ({
   undo: () => set(st => {
     const prev = st.past[st.past.length - 1];
     if (!prev) return {};
-    return { notes: prev.notes, order: prev.order, past: st.past.slice(0, -1), future: [...st.future, { notes: st.notes, order: st.order }] };
+    return { selected: st.selected.filter(id => prev.notes[id] && !prev.notes[id].deletedAt && (prev.notes[id].parentId ?? null) === st.ui.openFolderId), notes: prev.notes, order: prev.order, past: st.past.slice(0, -1), future: [...st.future, { notes: st.notes, order: st.order }] };
   }),
   redo: () => set(st => {
     const next = st.future[st.future.length - 1];
     if (!next) return {};
-    return { notes: next.notes, order: next.order, future: st.future.slice(0, -1), past: [...st.past, { notes: st.notes, order: st.order }] };
+    return { selected: st.selected.filter(id => next.notes[id] && !next.notes[id].deletedAt && (next.notes[id].parentId ?? null) === st.ui.openFolderId), notes: next.notes, order: next.order, future: st.future.slice(0, -1), past: [...st.past, { notes: st.notes, order: st.order }] };
   }),
   add: (n, opts) => {
     get().checkpoint();
@@ -174,7 +175,7 @@ export const useStore = create<State>((set, get) => ({
     return { order };
   }),
   replaceAll: (list, cam) => set(() => ({
-    notes: Object.fromEntries(list.map(n => [n.id, n])), order: list.map(n => n.id), selected: [], past: [], future: [],
+    notes: Object.fromEntries(list.map(n => [n.id, n])), order: list.map(n => n.id), folderCams: {}, selected: [], past: [], future: [],
     ...(cam ? { cam, camAnim: 0 } : {}),
   })),
   rect: id => rectOf(get().notes[id], get().sizes),

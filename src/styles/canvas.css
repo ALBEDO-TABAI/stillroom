@@ -1,6 +1,6 @@
 /* Canvas, modules and the shared prose. Numbers: docs/SPEC.md §3–4. */
 .sr-app { position: fixed; inset: 0; background: var(--sr-canvas); color: var(--sr-text); transition: background .4s; }
-.sr-viewport { position: absolute; inset: 0; overflow: hidden; touch-action: none; }
+.sr-viewport { position: absolute; inset: 0; overflow: clip; touch-action: none; }
 .sr-world { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; }
 body.sr-space-ready .sr-viewport { cursor: grab; }
 body.sr-space-active .sr-viewport, body.sr-space-active .sr-viewport * { cursor: grabbing !important; }
@@ -163,3 +163,16 @@ body.sr-space-active .sr-viewport, body.sr-space-active .sr-viewport * { cursor:
 @keyframes srCooling { from { background: #FFA000; } }
 @keyframes srMaterialize { from { opacity: 0; transform: translateY(4px); } }
 @keyframes srPlayCool { from { color: #FFA000; } }
+
+/* The selection owns its handles, while individual cards remain directly draggable. */
+.sr-group-handles { position: absolute; pointer-events: auto; cursor: grab; --sr-arc-rgb: 128,128,128; --sr-arc-a: .8; }
+.sr-group-handles .sr-arc svg { opacity: 1; }
+.sr-note { transform-origin: 0 0; }
+.sr-selection-hull { pointer-events: none; }
+
+.sr-clusters { transition: opacity 160ms ease; }
+.sr-viewport[data-settling] .sr-clusters { opacity: 0; }
+
+.sr-note[data-grouped] .sr-sel { opacity: 0; }
+
+.sr-guides line[data-kind="dock"] { stroke: #f5ab2f; stroke-dasharray: none; stroke-linecap: round; }

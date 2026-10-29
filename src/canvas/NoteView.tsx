@@ -53,11 +53,11 @@ export type CardHandlers = {
   onContext: (e: React.MouseEvent, id: string) => void;
 };
 
-export const NoteView = React.memo(function NoteView({ id, z, h, dropTarget, dragging }: { id: string; z: number; h: CardHandlers; dropTarget: boolean; dragging: boolean }) {
+export const NoteView = React.memo(function NoteView({ id, z, h, dropTarget, dragging, grouped }: { id: string; z: number; h: CardHandlers; dropTarget: boolean; dragging: boolean; grouped: boolean }) {
   const note = useStore(s => s.notes[id]);
   const selected = useStore(s => s.selected.includes(id));
   const editing = useStore(s => s.ui.editingId === id);
-  const axis = useStore(s => s.ui.menu?.kind === 'axis' && s.ui.menu.id === id);
+  const axis = useStore(s => s.ui.menu?.kind === 'axis' && s.selected.includes(id));
   const inWindow = useStore(s => s.ui.editorId === id);
   const dark = useStore(s => s.prefs.dark);
   const folderInfo = useStore(s => {
@@ -71,8 +71,11 @@ export const NoteView = React.memo(function NoteView({ id, z, h, dropTarget, dra
 
   useLayoutEffect(() => {
     const el = ref.current; if (!el) return;
-    const ro = new ResizeObserver(() => setSize(id, el.offsetWidth, el.offsetHeight));
-    ro.observe(el); setSize(id, el.offsetWidth, el.offsetHeight);
+    const ro = new ResizeObserver(([entry]) => {
+      const box = entry.borderBoxSize[0]; setSize(id, box.inlineSize, box.blockSize);
+    });
+    ro.observe(el);
+    const style = getComputedStyle(el); setSize(id, parseFloat(style.width), parseFloat(style.height));
     return () => ro.disconnect();
   }, [id, setSize]);
 
@@ -91,24 +94,25 @@ export const NoteView = React.memo(function NoteView({ id, z, h, dropTarget, dra
 
   const arcRgb = kind === 'image' || kind === 'video' || dark ? '255,255,255' : '0,0,0';
   return (
-    <div className="sr-note" style={{ left: note.canvasX, top: note.canvasY, width: w }}>
+    <div className="sr-note" data-grouped={grouped ? 'true' : undefined} style={{ left: note.canvasX, top: note.canvasY, width: w }}>
       <div
         ref={ref}
         data-card="true"
         data-note-id={id}
         data-kind={kind}
+        title={kind === 'folder' ? 'Double-click to open · Drag a corner to resize' : undefined}
         data-selected={selected ? 'true' : undefined}
         data-editing={editing ? 'true' : undefined}
         data-axis={axis ? 'true' : undefined}
         data-in-window={inWindow ? 'true' : undefined}
         data-dragging={dragging ? 'true' : undefined}
-        style={{ cursor: kind === 'folder' ? 'default' : editing ? 'auto' : undefined, ['--sr-arc-rgb' as any]: arcRgb, zIndex: axis ? 2 : 1 }}
+        style={{ cursor: editing ? 'auto' : undefined, ['--sr-arc-rgb' as any]: arcRgb, zIndex: axis ? 2 : 1 }}
         onPointerDown={e => h.onDown(e, id)}
         onContextMenu={e => h.onContext(e, id)}
       >
         {body}
-        {kind !== 'folder' && <Arcs onDown={(e, c) => h.onArc(e, id, c)} />}
-        {unpacked && <Edges inset={28} onDown={(e, s) => h.onEdge(e, id, s)} />}
+        {!grouped && <Arcs onDown={(e, c) => h.onArc(e, id, c)} />}
+        {unpacked && !grouped && <Edges inset={28} onDown={(e, s) => h.onEdge(e, id, s)} />}
         <div className="sr-sel" data-selection-outline="true" />
       </div>
       {editing && kind === 'text' && <InlineBar id={id} />}
