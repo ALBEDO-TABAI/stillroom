@@ -5,12 +5,13 @@ import { btn } from '../lib/button';
 import { from, useEscape } from '../lib/motion';
 import { openFolder, moveOut } from '../canvas/folders';
 import { toScreen } from '../canvas/camera';
+import { refreshLinkPreview } from '../lib/linkPreview';
 import { downloadSelection } from '../lib/selectionZip';
 import { resetSelection, folderSelection } from '../canvas/selection';
 import { rectOf, union } from '../lib/geometry';
 import { ago, fmtBytes } from '../lib/time';
 import { exportMd, exportPng, exportPdf } from '../lib/exporters';
-import { addFiles } from '../lib/capture';
+import { addFiles, addTextOrLink, webLink } from '../lib/capture';
 
 const AXIS_GAP = 12, CTX_R = 32;
 
@@ -98,6 +99,7 @@ export function AxisMenu() {
           <button className={solid} style={{ gridArea: '1 / 2' }} onClick={() => { void downloadSelection(ids); close(); }}><Icon name="download" />Download ZIP{multiple ? ` (${ids.length})` : ''}</button>
           </> : <>
           <button className={solid} aria-expanded={dl} style={{ gridArea: dl ? '2 / 2' : '1 / 2', ...from({ y: 10 }) }} onClick={() => setUI({ axisDownload: !dl })}><Icon name="download" />Download</button>
+          {note.type === 'link' && !dl && <button className={solid} style={{ gridArea: '1 / 3' }} title="Refresh preview" aria-label="Refresh preview" onClick={() => { close(); useStore.getState().setUI({ toast: 'Refreshing preview…' }); void refreshLinkPreview(id, true).then(ok => useStore.getState().setUI({ toast: ok ? 'Preview refreshed' : 'This site did not provide a preview' })); }}><Icon name="restore" /></button>}
           {dl && dlBtn('.png', '2 / 1', { justifySelf: 'end', ...from({ x: 10 }) }, () => exportPng(note))}
           {dl && dlBtn('.md', '1 / 2', { justifySelf: 'center', ...from({ y: 10 }) }, () => exportMd(note))}
           {dl && dlBtn('.pdf', '2 / 3', { justifySelf: 'start', ...from({ x: -10 }) }, () => exportPdf(note))}</>}
@@ -139,9 +141,9 @@ export function LinkInput() {
         onSubmit={e => {
           e.preventDefault();
           const v = (new FormData(e.currentTarget).get('u') as string).trim(); if (!v) return;
-          const url = /^https?:\/\//.test(v) ? v : `https://${v}`;
-          let domain = url; try { domain = new URL(url).hostname; } catch { /* */ }
-          useStore.getState().add(blankNote('link', li.wx - 130, li.wy - 97, { title: url, metadata: { url, domain } }), { select: true });
+          const url = webLink(v);
+          if (!url) { setUI({ toast: 'Enter a valid web link' }); return; }
+          addTextOrLink(url, { x: li.wx, y: li.wy });
           setUI({ linkInput: null });
         }}>
         <input name="u" autoFocus placeholder="Paste a link" onKeyDown={e => e.stopPropagation()} />

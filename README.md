@@ -22,3 +22,5 @@ Keyboard: ⌘⇧E exports the whole space as a .zip (JSON + media), ⌘⇧O impo
 Mac app (`desktop/`): menu bar with ⌘ shortcuts, remembered window, ⌥⌘Space quick capture, autosave to
 `~/Library/Application Support/Stillroom/autosave/` with rotating backups, link previews fetched and cached in the main process.
 See `docs/MAC_TEST.md`.
+
+Link previews: the web development server and `npm run preview` expose `/api/link-preview`; the Mac app uses the same resolver through its main process. It reads public page metadata (Open Graph, Twitter cards, JSON-LD and discovered JSON oEmbed), follows public redirects, and saves covers in IndexedDB. A link's context menu offers **Refresh preview**. Pages requiring login, blocking automated access or publishing no cover retain a text card. A standalone static `dist/` deployment needs the same preview API behind its origin; browser-only cross-site fetching is not supported.

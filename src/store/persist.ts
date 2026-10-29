@@ -64,7 +64,7 @@ export function clearLocal() { Object.values(K).forEach(k => localStorage.remove
 function safeParse(s: string): unknown { try { return JSON.parse(s); } catch { return null; } }
 
 // Mac app: mirror the space to disk (Application Support/Stillroom/autosave, with rotating backups).
-type Desktop = { autosave(json: string): Promise<boolean>; linkPreview(url: string): Promise<{ title?: string; image?: string; site?: string } | null> };
+type Desktop = { autosave(json: string): Promise<boolean>; linkPreview(url: string, refresh?: boolean): Promise<{ url: string; title?: string; description?: string; image?: string; site?: string } | null> };
 export const desktop = (globalThis as any).stillroomDesktop as Desktop | undefined;
 let tDisk = 0;
 function desktopAutosave() {

@@ -1,11 +1,18 @@
-import { desktop } from '../store/persist';
 // Capture: files (pictures, video, voice), links and text arriving by drop or paste become modules.
 import { useStore, blankNote } from '../store/store';
 import { putBlob } from '../store/blobs';
 import { fmtDur } from './time';
 import { CARD_W } from './constants';
 
-const URL_RE = /^(https?:\/\/)?([\w-]+\.)+[a-z]{2,}(\/\S*)?$/i;
+export function webLink(text: string) {
+  const explicit = /^https?:\/\//i.test(text);
+  if (/\s/.test(text) || /^[a-z][a-z\d+.-]*:/i.test(text) && !explicit) return null;
+  try {
+    const url = new URL(explicit ? text : `https://${text}`);
+    if (!explicit && !/\.(?:[a-z]{2,}|xn--[a-z0-9-]+)\.?$/i.test(url.hostname)) return null;
+    return /^https?:$/.test(url.protocol) && !url.username && !url.password ? url.href : null;
+  } catch { return null; }
+}
 
 function imageMeta(file: Blob): Promise<{ w: number; h: number }> {
   return new Promise(res => { const u = URL.createObjectURL(file); const i = new Image(); i.onload = () => { res({ w: i.naturalWidth, h: i.naturalHeight }); URL.revokeObjectURL(u); }; i.onerror = () => res({ w: 4, h: 3 }); i.src = u; });
@@ -70,17 +77,11 @@ const esc = (s: string) => s.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;'
 export function addTextOrLink(text: string, at: { x: number; y: number }) {
   const t = text.trim(); if (!t) return;
   const st = useStore.getState();
-  if (URL_RE.test(t) && !/\s/.test(t)) {
-    const url = /^https?:\/\//.test(t) ? t : `https://${t}`;
+  const url = webLink(t);
+  if (url) {
     let domain = url; try { domain = new URL(url).hostname; } catch { /* */ }
     const n = blankNote('link', at.x - 130, at.y - 97, { title: url, metadata: { url, domain } });
     st.add(n, { select: true });
-    // Mac app: the main process fetches Open Graph tags (cached on disk); the web build stays fully offline.
-    desktop?.linkPreview(url).then(og => {
-      const cur = useStore.getState().notes[n.id]; if (!og || !cur) return;
-      const meta = { ...cur.metadata, ...(og.title ? { linkTitle: og.title } : {}), ...(og.image ? { linkImage: og.image } : {}) };
-      useStore.setState(s => ({ notes: { ...s.notes, [n.id]: { ...cur, metadata: meta } } }));
-    }).catch(() => { /* offline: keep the domain card */ });
     return;
   }
   const [first, ...rest] = t.split('\n');

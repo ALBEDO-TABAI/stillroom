@@ -13,14 +13,9 @@
 .sr-record-wrap { position: fixed; z-index: 160; display: flex; justify-content: center; align-items: center; pointer-events: none; user-select: none; bottom: 0; left: 0; right: 0; padding: 20px 0; transition: opacity .45s, transform .45s; }
 .sr-record { width: 48px; height: 42px; border-radius: 999px; background: var(--sr-accent); border: none; cursor: pointer; pointer-events: all; transition: all .5s ease; transform-origin: center; display: flex; align-items: center; justify-content: center; gap: 10px; color: #fff; font: 500 15px/1 inherit; font-family: inherit; }
 .sr-record:hover { transform: scale(1.09); }
-.sr-record[data-mobile] { width: 136px; height: 119px; }
+.sr-record[data-mobile] { width: 80px; height: 80px; }
 .sr-record[data-mobile]:hover { transform: none; }
-.sr-record[data-mobile][data-rec] { width: 180px; }
 .sr-saved { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 500; color: var(--sr-text); animation: srFade .5s ease-out both; white-space: nowrap; }
-.sr-record[data-rec] { width: 140px; }
-.sr-record .sr-rec-dot { width: 8px; height: 8px; border-radius: 50%; background: #fff; animation: srRecPulse 1.2s ease-in-out infinite; }
-@keyframes srRecPulse { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
-.sr-rec-glow { position: fixed; left: 0; right: 0; bottom: 0; height: 200px; pointer-events: none; z-index: 150; background: radial-gradient(60% 100% at 50% 100%, rgba(255,160,0,0.22), transparent 70%); animation: srIn .6s ease both; }
 
 .sr-panel { position: fixed; z-index: 130; background: var(--sr-glass); -webkit-backdrop-filter: var(--sr-blur); backdrop-filter: var(--sr-blur); box-sizing: border-box; overflow: hidden auto; border-radius: 18px; color: var(--sr-text); max-height: calc(100vh - 73px); }
 .sr-panel::-webkit-scrollbar { width: 10px; }

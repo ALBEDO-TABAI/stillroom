@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Icon } from '../lib/icons';
 import { useStore, blankNote } from '../store/store';
 import { putBlob } from '../store/blobs';
@@ -6,19 +6,17 @@ import { toWorld } from '../canvas/camera';
 import { fmtDur } from '../lib/time';
 import { useEscape } from '../lib/motion';
 
-/** The orange button: press to record a voice module, press again to drop it on the canvas. */
+/** Press the microphone to record; press again to save the voice module. */
 export function RecordButton({ mobile = false }: { mobile?: boolean }) {
   const [phase, setPhase] = useState<null | 'saved'>(null);
   const focus = useStore(s => s.ui.focus);
   const setUI = useStore(s => s.setUI);
   const [rec, setRec] = useState<MediaRecorder | null>(null);
-  const [t, setT] = useState(0);
   const chunks = useRef<Blob[]>([]);
   const started = useRef(0);
   const transcript = useRef('');
   const recog = useRef<any>(null);
 
-  useEffect(() => { if (!rec) return; const i = setInterval(() => setT((Date.now() - started.current) / 1000), 250); return () => clearInterval(i); }, [rec]);
   useEscape(() => stop(true), !!rec);
 
   async function start() {
@@ -27,7 +25,7 @@ export function RecordButton({ mobile = false }: { mobile?: boolean }) {
       const mr = new MediaRecorder(stream);
       chunks.current = []; transcript.current = '';
       mr.ondataavailable = e => e.data.size && chunks.current.push(e.data);
-      mr.start(250); started.current = Date.now(); setT(0); setRec(mr); setUI({ recording: true });
+      mr.start(250); started.current = Date.now(); setRec(mr); setUI({ recording: true });
       const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       if (SR && useStore.getState().prefs.autoTranscribe) {
         const r = new SR(); r.continuous = true; r.interimResults = false; r.lang = navigator.language || 'en-US';
@@ -63,16 +61,14 @@ export function RecordButton({ mobile = false }: { mobile?: boolean }) {
 
   return (
     <>
-      {rec && <div className="sr-rec-glow" />}
       <div className="sr-record-wrap" style={mobile ? { inset: 0, padding: 0 } : { opacity: focus ? 0 : 1, transform: focus ? 'translateY(80px)' : 'none' }}>
         <div style={{ position: 'relative', pointerEvents: 'all' }}>
           {mobile && phase === 'saved' && <div className="sr-saved">Saved</div>}
-          <button className="sr-record" data-rec={rec ? 'true' : undefined} data-mobile={mobile ? 'true' : undefined} aria-label={rec ? 'Stop recording' : 'Record a voice module'} title={rec ? 'Stop' : 'Record'}
+          <button className="sr-record" data-rec={rec ? 'true' : undefined} data-mobile={mobile ? 'true' : undefined} aria-pressed={!!rec} aria-label={rec ? 'Stop recording' : 'Record a voice module'} title={rec ? 'Stop' : 'Record'}
             disabled={!!phase}
             style={phase ? { opacity: 0, transform: 'scale(0)', pointerEvents: 'none' } : undefined}
             onClick={() => (rec ? stop() : start())}>
-            {!rec && <><i className="sr-record-led" aria-hidden="true" /><Icon name="mic" size={18} /><span>Record</span></>}
-            {rec && <><span className="sr-rec-dot" /><span style={{ fontVariantNumeric: 'tabular-nums' }}>{fmtDur(t)}</span></>}
+            <Icon name="mic" size={mobile ? 32 : 22} />
           </button>
         </div>
       </div>

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import type { Note } from '../store/types';
 import { resolveMedia, resolveSync } from '../store/blobs';
 import { useStore } from '../store/store';
+import { refreshLinkPreview } from '../lib/linkPreview';
 import { Icon } from '../lib/icons';
 
 export function useMedia(ref?: string) {
@@ -51,11 +52,19 @@ export function LinkCard({ note }: { note: Note }) {
   const m = note.metadata;
   const domain = m.domain ?? (() => { try { return new URL(m.url ?? note.title).hostname; } catch { return note.title; } })();
   const img = useMedia(m.linkImage);
-  if (img) return (
+  const [failedImage, setFailedImage] = useState<string>();
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    if (m.linkImage && !failedImage || !failedImage && m.previewUpdatedAt && Date.now() - m.previewUpdatedAt < 180000) return;
+    let active = true; setLoading(true);
+    void refreshLinkPreview(note.id, !!failedImage).finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [note.id, m.url, failedImage]);
+  if (img && failedImage !== img) return (
     // Cover style (measured): dark base, cover image, a 22px backdrop blur masked up to 73% height, white title.
-    <div className="sr-link sr-link--cover">
+    <div className="sr-link sr-link--cover" title={m.url ?? note.title}>
       <div className="sr-link-bg" style={{ background: '#141414' }} />
-      <img className="sr-link-img" src={img} alt="" draggable={false} />
+      <img className="sr-link-img" src={img} alt="" draggable={false} referrerPolicy="no-referrer" onError={() => setFailedImage(img)} />
       <div className="sr-link-veil" />
       <div className="sr-link-cap">
         <div className="sr-link-ctitle">{m.linkTitle || domain}</div>
@@ -64,10 +73,11 @@ export function LinkCard({ note }: { note: Note }) {
     </div>
   );
   return (
-    <div className="sr-link">
+    <div className="sr-link" title={m.url ?? note.title}>
       <div className="sr-link-bg" />
       <div className="sr-link-meta">
         <div className="sr-link-title">{m.linkTitle || domain}</div>
+        {(loading || m.linkDescription) && <div className="sr-link-summary">{loading ? 'Loading preview…' : m.linkDescription}</div>}
         <div className="sr-link-row">
           <span className="sr-favicon">{(domain[0] || '?').toUpperCase()}</span>
           <span className="sr-domain">{domain}</span>

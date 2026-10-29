@@ -15,6 +15,9 @@ export interface NoteMeta {
   domain?: string;
   linkTitle?: string;
   linkImage?: string;
+  linkDescription?: string;
+  linkSite?: string;
+  previewUpdatedAt?: number;
   aspectRatio?: number;      // height / width
   lightImage?: boolean;
   rotation?: number;         // quarter turns

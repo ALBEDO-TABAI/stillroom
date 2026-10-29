@@ -130,7 +130,7 @@ body.sr-space-active .sr-viewport, body.sr-space-active .sr-viewport * { cursor:
 [data-card][data-axis] .sr-time { opacity: .5; }
 /* Link card with a cover (signed-in reference) */
 .sr-link--cover .sr-link-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
-.sr-link-veil { position: absolute; left: -8px; right: -8px; bottom: -8px; height: calc(73% + 8px); -webkit-backdrop-filter: blur(22px); backdrop-filter: blur(22px); -webkit-mask-image: linear-gradient(to top, #000 30%, transparent 100%); mask-image: linear-gradient(to top, #000 30%, transparent 100%); pointer-events: none; }
+.sr-link-veil { background: linear-gradient(to top, rgba(0,0,0,.76), transparent); position: absolute; left: -8px; right: -8px; bottom: -8px; height: calc(73% + 8px); -webkit-backdrop-filter: blur(22px); backdrop-filter: blur(22px); -webkit-mask-image: linear-gradient(to top, #000 30%, transparent 100%); mask-image: linear-gradient(to top, #000 30%, transparent 100%); pointer-events: none; }
 .sr-link-cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 14px 16px 16px; }
 .sr-link-ctitle { color: #fff; font-size: 18px; font-weight: 500; letter-spacing: -0.014em; line-height: 1.25; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .sr-link-crow { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
@@ -176,3 +176,5 @@ body.sr-space-active .sr-viewport, body.sr-space-active .sr-viewport * { cursor:
 .sr-note[data-grouped] .sr-sel { opacity: 0; }
 
 .sr-guides line[data-kind="dock"] { stroke: #f5ab2f; stroke-dasharray: none; stroke-linecap: round; }
+
+.sr-link-summary { color: var(--sr-muted); font-size: 12px; line-height: 1.45; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }

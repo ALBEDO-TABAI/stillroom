@@ -1,3 +1,4 @@
+import { getLinkPreview } from '../../server/link-preview';
 /**
  * Stillroom desktop: a thin Electron shell around the web build. The renderer is served from a privileged
  * `stillroom://app` origin so localStorage and IndexedDB (modules, media blobs) persist between launches,
@@ -69,34 +70,8 @@ ipcMain.handle('sr:autosave', (_e, json: string) => {
 });
 ipcMain.handle('sr:reveal-backups', () => { fs.mkdirSync(data('autosave'), { recursive: true }); shell.openPath(data('autosave')); });
 
-// ---- link previews (Open Graph), cached ------------------------------------------------------------
-type Og = { title?: string; image?: string; site?: string; at: number };
-const ogCacheFile = () => data('og-cache.json');
-let ogCache: Record<string, Og> | null = null;
-const attr = (html: string, key: string) => {
-  const re = new RegExp(`<meta[^>]+(?:property|name)=["']${key}["'][^>]*>`, 'i'); const tag = html.match(re)?.[0];
-  return tag?.match(/content=["']([^"']*)["']/i)?.[1];
-};
-const decode = (s?: string) => s?.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').trim() || undefined;
-ipcMain.handle('sr:og', async (_e, url: string) => {
-  if (typeof url !== 'string' || !/^https?:\/\//i.test(url)) return null;
-  ogCache ??= readJson<Record<string, Og>>(ogCacheFile(), {});
-  const hit = ogCache[url]; if (hit && Date.now() - hit.at < 7 * 864e5) return hit;
-  try {
-    const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 6000);
-    const r = await net.fetch(url, { signal: ctl.signal, headers: { 'user-agent': 'Mozilla/5.0 (Macintosh) Stillroom link preview', accept: 'text/html' }, credentials: 'omit' } as any);
-    clearTimeout(t);
-    if (!r.ok || !/html/i.test(r.headers.get('content-type') ?? '')) return null;
-    const html = (await r.text()).slice(0, 512 * 1024);
-    let image = decode(attr(html, 'og:image') ?? attr(html, 'twitter:image'));
-    if (image) try { image = new URL(image, r.url).toString(); } catch { image = undefined; }
-    const og: Og = { title: decode(attr(html, 'og:title') ?? attr(html, 'twitter:title') ?? html.match(/<title[^>]*>([^<]*)/i)?.[1])?.slice(0, 300), image, site: decode(attr(html, 'og:site_name')), at: Date.now() };
-    ogCache[url] = og;
-    const keys = Object.keys(ogCache); if (keys.length > 2000) keys.sort((a, b) => ogCache![a].at - ogCache![b].at).slice(0, keys.length - 2000).forEach(k => delete ogCache![k]);
-    writeAtomic(ogCacheFile(), JSON.stringify(ogCache));
-    return og;
-  } catch { return null; }
-});
+// ---- shared public-web previews ---------------------------------------------------------------
+ipcMain.handle('sr:og', (_e, url: string, refresh = false) => getLinkPreview(url, refresh).catch(() => null));
 
 // ---- menu ----------------------------------------------------------------------------------------
 function buildMenu() {
